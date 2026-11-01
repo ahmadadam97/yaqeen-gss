@@ -1,0 +1,293 @@
+Slowest baseline: 07_overlap.sql
+Single thread, median of 3 warm runs; durations include fetching rows.
+Baseline ms: 01_prayer.sql 61.08, 02_afterlife.sql 46.56, 03_industry.sql 63.44, 04_tv_satisfaction.sql 54.58, 05_ever_work.sql 41.74, 06_wave_changes.sql 47.52, 07_overlap.sql 90.87
+Before: 90.87 ms; after: 7.97 ms; equal result rows: 1.
+BEFORE
+┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+explain analyze with membership as (     select survey_year, respondent_id,            bool_or(filename='yaqeen_cut_a_2014_2016.json') as in_a,            bool_or(filename='yaqeen_cut_b_2016_2018.json') as in_b     from baseline_membership group by all ), counts as (     select count(*) filter (where in_a) as a, count(*) filter (where in_b) as b,            count(*) filter (where in_a and in_b) as shared, count(*) filter (where in_a or in_b) as distinct_n     from membership ) select *, round(100.0*shared/nullif(a,0),2) as pct_a, round(100.0*shared/nullif(b,0),2) as pct_b from counts 
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.100s              ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│             a             │
+│             b             │
+│           shared          │
+│         distinct_n        │
+│           pct_a           │
+│           pct_b           │
+│                           │
+│           1 row           │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│             a             │
+│             b             │
+│           shared          │
+│         distinct_n        │
+│ CAST((100.0 * CAST(shared │
+│    AS DECIMAL(23,0))) AS  │
+│           DOUBLE)         │
+│                           │
+│           1 row           │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│    UNGROUPED_AGGREGATE    │
+│    ────────────────────   │
+│        Aggregates:        │
+│ count_star() FILTER (WHERE│
+│       #0) Filter: #0      │
+│ count_star() FILTER (WHERE│
+│       #1) Filter: #1      │
+│ count_star() FILTER (WHERE│
+│       #2) Filter: #2      │
+│ count_star() FILTER (WHERE│
+│       #3) Filter: #3      │
+│                           │
+│           1 row           │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│            in_a           │
+│            in_b           │
+│      (in_a AND in_b)      │
+│       (in_a OR in_b)      │
+│                           │
+│         7,753 rows        │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│            in_a           │
+│            in_b           │
+│                           │
+│         7,753 rows        │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│       HASH_GROUP_BY       │
+│    ────────────────────   │
+│          Groups:          │
+│             #0            │
+│             #1            │
+│                           │
+│        Aggregates:        │
+│        bool_or(#2)        │
+│        bool_or(#3)        │
+│                           │
+│         7,753 rows        │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│        survey_year        │
+│       respondent_id       │
+│        (filename =        │
+│  'yaqeen_cut_a_2014_2016  │
+│          .json')          │
+│        (filename =        │
+│  'yaqeen_cut_b_2016_2018  │
+│          .json')          │
+│                           │
+│        10,620 rows        │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│          filename         │
+│        survey_year        │
+│       respondent_id       │
+│                           │
+│        10,620 rows        │
+│          (0.08s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         TABLE_SCAN        │
+│    ────────────────────   │
+│       Table: records      │
+│   Type: Sequential Scan   │
+│                           │
+│        Projections:       │
+│          filename         │
+│          payload          │
+│                           │
+│        10,620 rows        │
+│          (0.01s)          │
+└───────────────────────────┘
+
+AFTER
+┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+explain analyze with membership as (     select survey_year, respondent_id,            bool_or(filename='yaqeen_cut_a_2014_2016.json') as in_a,            bool_or(filename='yaqeen_cut_b_2016_2018.json') as in_b     from stg_membership group by all ), counts as (     select count(*) filter (where in_a) as a, count(*) filter (where in_b) as b,            count(*) filter (where in_a and in_b) as shared, count(*) filter (where in_a or in_b) as distinct_n     from membership ) select *, round(100.0*shared/nullif(a,0),2) as pct_a, round(100.0*shared/nullif(b,0),2) as pct_b from counts 
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.0118s             ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│             a             │
+│             b             │
+│           shared          │
+│         distinct_n        │
+│           pct_a           │
+│           pct_b           │
+│                           │
+│           1 row           │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│             a             │
+│             b             │
+│           shared          │
+│         distinct_n        │
+│ CAST((100.0 * CAST(shared │
+│    AS DECIMAL(23,0))) AS  │
+│           DOUBLE)         │
+│                           │
+│           1 row           │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│    UNGROUPED_AGGREGATE    │
+│    ────────────────────   │
+│        Aggregates:        │
+│ count_star() FILTER (WHERE│
+│       #0) Filter: #0      │
+│ count_star() FILTER (WHERE│
+│       #1) Filter: #1      │
+│ count_star() FILTER (WHERE│
+│       #2) Filter: #2      │
+│ count_star() FILTER (WHERE│
+│       #3) Filter: #3      │
+│                           │
+│           1 row           │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│            in_a           │
+│            in_b           │
+│      (in_a AND in_b)      │
+│       (in_a OR in_b)      │
+│                           │
+│         7,753 rows        │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│            in_a           │
+│            in_b           │
+│                           │
+│         7,753 rows        │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│__internal_decompress_integ│
+│   ral_integer(#0, 2014)   │
+│__internal_decompress_integ│
+│     ral_integer(#1, 1)    │
+│             #2            │
+│             #3            │
+│                           │
+│         7,753 rows        │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│       HASH_GROUP_BY       │
+│    ────────────────────   │
+│          Groups:          │
+│             #0            │
+│             #1            │
+│                           │
+│        Aggregates:        │
+│        bool_or(#2)        │
+│        bool_or(#3)        │
+│                           │
+│         7,753 rows        │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│        survey_year        │
+│       respondent_id       │
+│        (filename =        │
+│  'yaqeen_cut_a_2014_2016  │
+│          .json')          │
+│        (filename =        │
+│  'yaqeen_cut_b_2016_2018  │
+│          .json')          │
+│                           │
+│        10,620 rows        │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│__internal_compress_integra│
+│    l_utinyint(#0, 2014)   │
+│__internal_compress_integra│
+│     l_usmallint(#1, 1)    │
+│             #2            │
+│                           │
+│        10,620 rows        │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         TABLE_SCAN        │
+│    ────────────────────   │
+│   Table: stg_membership   │
+│   Type: Sequential Scan   │
+│                           │
+│        Projections:       │
+│        survey_year        │
+│       respondent_id       │
+│          filename         │
+│                           │
+│        10,620 rows        │
+│          (0.00s)          │
+└───────────────────────────┘

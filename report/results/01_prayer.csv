@@ -1,0 +1,63 @@
+upbringing,frequency,n,group_n,pct
+Buddhism,Several times a day,5,33,15.15
+Buddhism,Once a day,7,33,21.21
+Buddhism,Several times a week,1,33,3.03
+Buddhism,Once a week,4,33,12.12
+Buddhism,Less than once a week,9,33,27.27
+Buddhism,Never,7,33,21.21
+Catholic,Several times a day,601,2515,23.9
+Catholic,Once a day,834,2515,33.16
+Catholic,Several times a week,267,2515,10.62
+Catholic,Once a week,182,2515,7.24
+Catholic,Less than once a week,276,2515,10.97
+Catholic,Never,355,2515,14.12
+Christian,Several times a day,28,111,25.23
+Christian,Once a day,27,111,24.32
+Christian,Several times a week,15,111,13.51
+Christian,Once a week,8,111,7.21
+Christian,Less than once a week,15,111,13.51
+Christian,Never,18,111,16.22
+Hinduism,Several times a day,7,42,16.67
+Hinduism,Once a day,17,42,40.48
+Hinduism,Several times a week,5,42,11.9
+Hinduism,Once a week,3,42,7.14
+Hinduism,Less than once a week,4,42,9.52
+Hinduism,Never,6,42,14.29
+Jewish,Several times a day,23,137,16.79
+Jewish,Once a day,17,137,12.41
+Jewish,Several times a week,10,137,7.3
+Jewish,Once a week,7,137,5.11
+Jewish,Less than once a week,25,137,18.25
+Jewish,Never,55,137,40.15
+Muslim/Islam,Several times a day,28,49,57.14
+Muslim/Islam,Once a day,6,49,12.24
+Muslim/Islam,Several times a week,6,49,12.24
+Muslim/Islam,Once a week,3,49,6.12
+Muslim/Islam,Less than once a week,1,49,2.04
+Muslim/Islam,Never,5,49,10.2
+Native American,Several times a day,3,5,60.0
+Native American,Once a day,2,5,40.0
+None,Several times a day,118,682,17.3
+None,Once a day,130,682,19.06
+None,Several times a week,58,682,8.5
+None,Once a week,34,682,4.99
+None,Less than once a week,86,682,12.61
+None,Never,256,682,37.54
+Orthodox-Christian,Several times a day,13,35,37.14
+Orthodox-Christian,Once a day,3,35,8.57
+Orthodox-Christian,Several times a week,4,35,11.43
+Orthodox-Christian,Once a week,3,35,8.57
+Orthodox-Christian,Less than once a week,2,35,5.71
+Orthodox-Christian,Never,10,35,28.57
+Other,Several times a day,6,43,13.95
+Other,Once a day,14,43,32.56
+Other,Several times a week,8,43,18.6
+Other,Once a week,3,43,6.98
+Other,Less than once a week,4,43,9.3
+Other,Never,8,43,18.6
+Protestant,Several times a day,1413,4007,35.26
+Protestant,Once a day,1200,4007,29.95
+Protestant,Several times a week,397,4007,9.91
+Protestant,Once a week,219,4007,5.47
+Protestant,Less than once a week,346,4007,8.63
+Protestant,Never,432,4007,10.78

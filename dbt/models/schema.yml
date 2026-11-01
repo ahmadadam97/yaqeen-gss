@@ -1,0 +1,62 @@
+version: 2
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: records
+        description: One immutable source observation per filename and row ordinal.
+models:
+  - name: stg_membership
+    description: Source membership, including one copy in each overlapping cut.
+    columns:
+      - {name: filename, description: Committed JSON basename in the file manifest.}
+      - {name: ordinal, description: One-based source row position.}
+      - {name: survey_year, description: Cross-sectional GSS wave.}
+      - {name: respondent_id, description: ID within this wave.}
+  - name: answers
+    description: One row per interview and catalogued variable. Use status before aggregating.
+    columns:
+      - {name: survey_year, description: Interview wave.}
+      - {name: respondent_id, description: Within-wave respondent ID.}
+      - {name: variable, description: Explorer variable name.}
+      - {name: raw_label, description: Original exported text including missing labels.}
+      - {name: source_code, description: Code mapped from an unambiguous label when supplied.}
+      - {name: status, description: Meaning of the response or reason it is unavailable.}
+      - {name: answer_label, description: Readable response for genuine answers only.}
+      - {name: answer_value, description: Measured value or categorical code. Average only quantitative measures.}
+  - name: respondents
+    description: One row per (survey_year, respondent_id) across all extracts.
+    columns:
+      - {name: survey_year, description: "Interview year."}
+      - {name: respondent_id, description: "Respondent ID within year."}
+      - {name: wrkstat, description: "Labor force status."}
+      - {name: evwork, description: "Ever worked as long as one year."}
+      - {name: degree, description: "Highest completed credential."}
+      - {name: indus10, description: "Industry of current or prior employment."}
+      - {name: satjob, description: "Reported satisfaction with work."}
+      - {name: postlife, description: "Belief in life after death."}
+      - {name: pray, description: "Prayer frequency."}
+      - {name: relig16, description: "Religion in which raised."}
+      - {name: relig, description: "Current religious preference."}
+      - {name: attend, description: "Frequency of attendance at religious services."}
+      - {name: reliten, description: "Strength of religious affiliation."}
+      - {name: news, description: "Frequency of newspaper reading."}
+      - {name: inttech, description: "Interest in new inventions and technology issues."}
+      - {name: sex, description: "Sex as recorded in the historical survey."}
+      - {name: region, description: "Public-use interview region."}
+      - {name: form, description: "Questionnaire form."}
+      - {name: mode, description: "Interview mode."}
+      - {name: ballot, description: "Questionnaire ballot."}
+      - {name: age_value, description: "Age in years with 89 representing 89 or older."}
+      - {name: educ_value, description: "Years of schooling with 20 representing 20 or more."}
+      - {name: tvhours_value, description: "Reported television hours per day."}
+      - {name: wwwhr_value, description: "Whole weekly hours on the web excluding email."}
+      - {name: wwwmin_value, description: "Additional weekly web minutes."}
+      - {name: wtssps_value, description: "Person poststratification weight."}
+      - {name: wtssnrps_value, description: "Nonresponse-adjusted person weight."}
+      - {name: wrkstat_value, description: "Original numeric labor force category."}
+      - {name: pray_value, description: "Ordered frequency code. Lower means more frequent."}
+      - {name: postlife_status, description: "Response classification for the afterlife question."}
+      - {name: is_working, description: "Full-time or part-time employment or temporarily absent from a job."}
+      - {name: ever_work_eligible, description: "Work status codes 5 through 8 routed to EVWORK."}
+      - {name: web_hours_weekly, description: "Hours plus fractional minutes when both components are observed."}

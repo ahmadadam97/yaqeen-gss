@@ -1,0 +1,773 @@
+variable,source_code,label,kind
+age,-100,.i:  Inapplicable,inapplicable
+age,-99,.n:  No answer,no_answer
+age,-98,.d:  Do not Know/Cannot Choose,dont_know
+age,-97,.s:  Skipped on Web,skipped_web
+age,-96,.z:  Variable-specific reserve code,reserved
+age,-95,.u:  Uncodable,uncodable
+age,-90,.r:  Refused,refused
+age,-80,.x:  Not available in this release,unavailable_release
+age,-70,.y:  Not available in this year,not_asked_year
+age,-60,.j:  I do not have a job,no_job
+age,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+age,-40,".m:  DK, NA, IAP",mixed_missing
+age,89,89 or older,answer
+attend,-100,.i:  Inapplicable,inapplicable
+attend,-99,.n:  No answer,no_answer
+attend,-98,.d:  Do not Know/Cannot Choose,dont_know
+attend,-97,.s:  Skipped on Web,skipped_web
+attend,-96,.z:  Variable-specific reserve code,reserved
+attend,-95,.u:  Uncodable,uncodable
+attend,-90,.r:  Refused,refused
+attend,-80,.x:  Not available in this release,unavailable_release
+attend,-70,.y:  Not available in this year,not_asked_year
+attend,-60,.j:  I do not have a job,no_job
+attend,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+attend,-40,".m:  DK, NA, IAP",mixed_missing
+attend,0,Never,answer
+attend,1,Less than once a year,answer
+attend,2,About once or twice a year,answer
+attend,3,Several times a year,answer
+attend,4,About once a month,answer
+attend,5,2-3 times a month,answer
+attend,6,Nearly every week,answer
+attend,7,Every week,answer
+attend,8,Several times a week,answer
+ballot,-100,.i:  Inapplicable,inapplicable
+ballot,-99,.n:  No answer,no_answer
+ballot,-98,.d:  Do not Know/Cannot Choose,dont_know
+ballot,-97,.s:  Skipped on Web,skipped_web
+ballot,-96,.z:  Variable-specific reserve code,reserved
+ballot,-95,.u:  Uncodable,uncodable
+ballot,-90,.r:  Refused,refused
+ballot,-80,.x:  Not available in this release,unavailable_release
+ballot,-70,.y:  Not available in this year,not_asked_year
+ballot,-60,.j:  I do not have a job,no_job
+ballot,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+ballot,-40,".m:  DK, NA, IAP",mixed_missing
+ballot,1,Ballot a,answer
+ballot,2,Ballot b,answer
+ballot,3,Ballot c,answer
+ballot,4,Ballot d,answer
+compuse,-100,.i:  Inapplicable,inapplicable
+compuse,-99,.n:  No answer,no_answer
+compuse,-98,.d:  Do not Know/Cannot Choose,dont_know
+compuse,-97,.s:  Skipped on Web,skipped_web
+compuse,-96,.z:  Variable-specific reserve code,reserved
+compuse,-95,.u:  Uncodable,uncodable
+compuse,-90,.r:  Refused,refused
+compuse,-80,.x:  Not available in this release,unavailable_release
+compuse,-70,.y:  Not available in this year,not_asked_year
+compuse,-60,.j:  I do not have a job,no_job
+compuse,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+compuse,-40,".m:  DK, NA, IAP",mixed_missing
+compuse,1,YES,answer
+compuse,2,NO,answer
+degree,-100,.i:  Inapplicable,inapplicable
+degree,-99,.n:  No answer,no_answer
+degree,-98,.d:  Do not Know/Cannot Choose,dont_know
+degree,-97,.s:  Skipped on Web,skipped_web
+degree,-96,.z:  Variable-specific reserve code,reserved
+degree,-95,.u:  Uncodable,uncodable
+degree,-90,.r:  Refused,refused
+degree,-80,.x:  Not available in this release,unavailable_release
+degree,-70,.y:  Not available in this year,not_asked_year
+degree,-60,.j:  I do not have a job,no_job
+degree,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+degree,-40,".m:  DK, NA, IAP",mixed_missing
+degree,0,Less than high school,answer
+degree,1,High school,answer
+degree,2,Associate/junior college,answer
+degree,3,Bachelor's,answer
+degree,4,Graduate,answer
+educ,-100,.i:  Inapplicable,inapplicable
+educ,-99,.n:  No answer,no_answer
+educ,-98,.d:  Do not Know/Cannot Choose,dont_know
+educ,-97,.s:  Skipped on Web,skipped_web
+educ,-96,.z:  Variable-specific reserve code,reserved
+educ,-95,.u:  Uncodable,uncodable
+educ,-94,.q:  Not imputable,not_imputable
+educ,-93,.f:  Missing Birthdate Information,missing_birthdate
+educ,-90,.r:  Refused,refused
+educ,-80,.x:  Not available in this release,unavailable_release
+educ,-70,.y:  Not available in this year,not_asked_year
+educ,-60,.j:  I do not have a job,no_job
+educ,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+educ,-40,".m:  DK, NA, IAP",mixed_missing
+educ,0,No formal schooling,answer
+educ,1,1st grade,answer
+educ,2,2nd grade,answer
+educ,3,3rd grade,answer
+educ,4,4th grade,answer
+educ,5,5th grade,answer
+educ,6,6th grade,answer
+educ,7,7th grade,answer
+educ,8,8th grade,answer
+educ,9,9th grade,answer
+educ,10,10th grade,answer
+educ,11,11th grade,answer
+educ,12,12th grade,answer
+educ,13,1 year of college,answer
+educ,14,2 years of college,answer
+educ,15,3 years of college,answer
+educ,16,4 years of college,answer
+educ,17,5 years of college,answer
+educ,18,6 years of college,answer
+educ,19,7 years of college,answer
+educ,20,8 or more years of college,answer
+emailhr,-100,.i:  Inapplicable,inapplicable
+emailhr,-99,.n:  No answer,no_answer
+emailhr,-98,.d:  Do not Know/Cannot Choose,dont_know
+emailhr,-97,.s:  Skipped on Web,skipped_web
+emailhr,-96,.z:  Variable-specific reserve code,reserved
+emailhr,-95,.u:  Uncodable,uncodable
+emailhr,-90,.r:  Refused,refused
+emailhr,-80,.x:  Not available in this release,unavailable_release
+emailhr,-70,.y:  Not available in this year,not_asked_year
+emailhr,-60,.j:  I do not have a job,no_job
+emailhr,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+emailhr,-40,".m:  DK, NA, IAP",mixed_missing
+emailhr,0,0 hours,answer
+emailhr,168,168 hours,answer
+emailmin,-100,.i:  Inapplicable,inapplicable
+emailmin,-99,.n:  No answer,no_answer
+emailmin,-98,.d:  Do not Know/Cannot Choose,dont_know
+emailmin,-97,.s:  Skipped on Web,skipped_web
+emailmin,-96,.z:  Variable-specific reserve code,reserved
+emailmin,-95,.u:  Uncodable,uncodable
+emailmin,-90,.r:  Refused,refused
+emailmin,-80,.x:  Not available in this release,unavailable_release
+emailmin,-70,.y:  Not available in this year,not_asked_year
+emailmin,-60,.j:  I do not have a job,no_job
+emailmin,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+emailmin,-40,".m:  DK, NA, IAP",mixed_missing
+emailmin,0,0 minutes,answer
+emailmin,59,59 minutes,answer
+evwork,-100,.i:  Inapplicable,inapplicable
+evwork,-99,.n:  No answer,no_answer
+evwork,-98,.d:  Do not Know/Cannot Choose,dont_know
+evwork,-97,.s:  Skipped on Web,skipped_web
+evwork,-96,.z:  Variable-specific reserve code,reserved
+evwork,-95,.u:  Uncodable,uncodable
+evwork,-90,.r:  Refused,refused
+evwork,-80,.x:  Not available in this release,unavailable_release
+evwork,-70,.y:  Not available in this year,not_asked_year
+evwork,-60,.j:  I do not have a job,no_job
+evwork,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+evwork,-40,".m:  DK, NA, IAP",mixed_missing
+evwork,1,YES,answer
+evwork,2,NO,answer
+form,-100,.i:  Inapplicable,inapplicable
+form,-99,.n:  No answer,no_answer
+form,-98,.d:  Do not Know/Cannot Choose,dont_know
+form,-97,.s:  Skipped on Web,skipped_web
+form,-96,.z:  Variable-specific reserve code,reserved
+form,-95,.u:  Uncodable,uncodable
+form,-90,.r:  Refused,refused
+form,-80,.x:  Not available in this release,unavailable_release
+form,-70,.y:  Not available in this year,not_asked_year
+form,-60,.j:  I do not have a job,no_job
+form,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+form,-40,".m:  DK, NA, IAP",mixed_missing
+form,1,Standard <x>,answer
+form,2,Alternate <y>,answer
+form,3,Alternate <z>,answer
+indus10,-100,.i:  Inapplicable,inapplicable
+indus10,-99,.n:  No answer,no_answer
+indus10,-98,.d:  Do not Know/Cannot Choose,dont_know
+indus10,-97,.s:  Skipped on Web,skipped_web
+indus10,-96,.z:  Variable-specific reserve code,reserved
+indus10,-95,.u:  Uncodable,uncodable
+indus10,-94,.q:  Not imputable,not_imputable
+indus10,-93,.f:  Missing Birthdate Information,missing_birthdate
+indus10,-90,.r:  Refused,refused
+indus10,-80,.x:  Not available in this release,unavailable_release
+indus10,-70,.y:  Not available in this year,not_asked_year
+indus10,-60,.j:  I do not have a job,no_job
+indus10,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+indus10,-40,".m:  DK, NA, IAP",mixed_missing
+indus10,170,Crop production,answer
+indus10,180,Animal production,answer
+indus10,190,"Forestry, except logging",answer
+indus10,270,Logging,answer
+indus10,280,"Fishing, hunting, and trapping",answer
+indus10,290,Support activities for agriculture and forestry,answer
+indus10,370,Oil and gas extraction,answer
+indus10,380,Coal mining,answer
+indus10,390,Metal ore mining,answer
+indus10,470,Nonmetallic mineral mining and quarrying,answer
+indus10,480,Not specified type of mining,answer
+indus10,490,Support activities for mining,answer
+indus10,570,"Electric power generation, transmission, and distribution",answer
+indus10,580,Natural gas distribution,answer
+indus10,590,"Electric and gas, and other combinations",answer
+indus10,670,"Water, steam, air-conditioning, and irrigation systems",answer
+indus10,680,Sewage treatment facilities,answer
+indus10,690,Not specified utilities,answer
+indus10,770,Construction,answer
+indus10,1070,"Animal food, grain, and oilseed milling",answer
+indus10,1080,Sugar and confectionery products,answer
+indus10,1090,Fruit and vegetable preserving and specialty food manufacturing,answer
+indus10,1170,Dairy product manufacturing,answer
+indus10,1180,Animal slaughtering and processing,answer
+indus10,1190,Retail bakeries,answer
+indus10,1270,"Bakeries, except retail",answer
+indus10,1280,"Seafood and other miscellaneous foods, n.e.c.",answer
+indus10,1290,Not specified food industries,answer
+indus10,1370,Beverage manufacturing,answer
+indus10,1390,Tobacco manufacturing,answer
+indus10,1470,"Fiber, yarn, and thread mills",answer
+indus10,1480,"Fabric mills, except knitting mills",answer
+indus10,1490,Textile and fabric finishing and coating mills,answer
+indus10,1570,Carpet and rug mills,answer
+indus10,1590,"Textile product mills, except carpet and rug",answer
+indus10,1670,"Knitting fabric mills, and apparel knitting mills",answer
+indus10,1680,Cut and sew apparel manufacturing,answer
+indus10,1690,Apparel accessories and other apparel manufacturing,answer
+indus10,1770,Footwear manufacturing,answer
+indus10,1790,Leather tanning and finishing and other allied products manufacturing,answer
+indus10,1870,"Pulp, paper, and paperboard mills",answer
+indus10,1880,Paperboard containers and boxes,answer
+indus10,1890,Miscellaneous paper and pulp products,answer
+indus10,1990,Printing and related support activities,answer
+indus10,2070,Petroleum refining,answer
+indus10,2090,Miscellaneous petroleum and coal products,answer
+indus10,2170,"Resin, synthetic rubber and fibers, and filaments manufacturing",answer
+indus10,2180,Agricultural chemical manufacturing,answer
+indus10,2190,Pharmaceutical and medicine manufacturing,answer
+indus10,2270,"Paint, coating, and adhesive manufacturing",answer
+indus10,2280,"Soap, cleaning compound, and cosmetics manufacturing",answer
+indus10,2290,Industrial and miscellaneous chemicals,answer
+indus10,2370,Plastics product manufacturing,answer
+indus10,2380,Tire manufacturing,answer
+indus10,2390,"Rubber product, except tire, manufacturing",answer
+indus10,2470,"Pottery, ceramics, and plumbing fixture manufacturing",answer
+indus10,2480,Structural clay product manufacturing,answer
+indus10,2490,Glass and glass product manufacturing,answer
+indus10,2570,"Cement, concrete, lime, and gypsum product manufacturing",answer
+indus10,2590,Miscellaneous nonmetallic mineral product manufacturing,answer
+indus10,2670,Iron and steel mills and steel product manufacturing,answer
+indus10,2680,Aluminum production and processing,answer
+indus10,2690,Nonferrous metal (except aluminum) production and processing,answer
+indus10,2770,Foundries,answer
+indus10,2780,Metal forgings and stampings,answer
+indus10,2790,Cutlery and hand tool manufacturing,answer
+indus10,2870,"Structural metals, and boiler, tank, and shipping container manufacturing",answer
+indus10,2880,"Machine shops; turned product; screw, nut, and bolt manufacturing",answer
+indus10,2890,"Coating, engraving, heat treating and allied activities",answer
+indus10,2970,Ordnance,answer
+indus10,2980,Miscellaneous fabricated metal products manufacturing,answer
+indus10,2990,Not specified metal industries,answer
+indus10,3070,Agricultural implement manufacturing,answer
+indus10,3080,"Construction, and mining and oil and gas field machinery manufacturing",answer
+indus10,3090,Commercial and service industry machinery manufacturing,answer
+indus10,3170,Metalworking machinery manufacturing,answer
+indus10,3180,"Engines, turbines, and power transmission equipment manufacturing",answer
+indus10,3190,"Machinery manufacturing, n.e.c.",answer
+indus10,3290,Not specified machinery manufacturing,answer
+indus10,3360,Computer and peripheral equipment manufacturing,answer
+indus10,3370,"Communications, and audio and video equipment manufacturing",answer
+indus10,3380,"Navigational, measuring, electromedical, and control instruments manufacturing",answer
+indus10,3390,"Electronic component and product manufacturing, n.e.c.",answer
+indus10,3470,Household appliance manufacturing,answer
+indus10,3490,"Electrical lighting and electrical equipment manufacturing, and other electrical component manufacturing, n.e.c.",answer
+indus10,3570,Motor vehicles and motor vehicle equipment manufacturing,answer
+indus10,3580,Aircraft and parts manufacturing,answer
+indus10,3590,Aerospace product and parts manufacturing,answer
+indus10,3670,Railroad rolling stock manufacturing,answer
+indus10,3680,Ship and boat building,answer
+indus10,3690,Other transportation equipment manufacturing,answer
+indus10,3770,Sawmills and wood preservation,answer
+indus10,3780,"Veneer, plywood, and engineered wood products",answer
+indus10,3790,Prefabricated wood buildings and mobile homes,answer
+indus10,3870,Miscellaneous wood products,answer
+indus10,3890,Furniture and related product manufacturing,answer
+indus10,3960,Medical equipment and supplies manufacturing,answer
+indus10,3970,"Sporting and athletic goods, and doll, toy and game manufacturing",answer
+indus10,3980,"Miscellaneous manufacturing, n.e.c.",answer
+indus10,3990,Not specified manufacturing industries,answer
+indus10,4070,"Motor vehicles, parts and supplies, merchant wholesalers",answer
+indus10,4080,"Furniture and home furnishing, merchant wholesalers",answer
+indus10,4090,"Lumber and other construction materials, merchant wholesalers",answer
+indus10,4170,"Professional and commercial equipment and supplies, merchant wholesalers",answer
+indus10,4180,"Metals and minerals, except petroleum, merchant wholesalers",answer
+indus10,4190,"Electrical and electronic goods, merchant wholesalers",answer
+indus10,4260,"Hardware, plumbing and heating equipment, and supplies, merchant wholesalers",answer
+indus10,4270,"Machinery, equipment, and supplies, merchant wholesalers",answer
+indus10,4280,"Recyclable material, merchant wholesalers",answer
+indus10,4290,"Miscellaneous durable goods, merchant wholesalers",answer
+indus10,4370,"Paper and paper products, merchant wholesalers",answer
+indus10,4380,"Drugs, sundries, and chemical and allied products, merchant wholesalers",answer
+indus10,4390,"Apparel, fabrics, and notions, merchant wholesalers",answer
+indus10,4470,"Groceries and related products, merchant wholesalers",answer
+indus10,4480,"Farm product raw materials, merchant wholesalers",answer
+indus10,4490,"Petroleum and petroleum products, merchant wholesalers",answer
+indus10,4560,"Alcoholic beverages, merchant wholesalers",answer
+indus10,4570,"Farm supplies, merchant wholesalers",answer
+indus10,4580,"Miscellaneous nondurable goods, merchant wholesalers",answer
+indus10,4585,"Wholesale electronic markets, agents and brokers",answer
+indus10,4590,Not specified wholesale trade,answer
+indus10,4670,Automobile dealers,answer
+indus10,4680,Other motor vehicle dealers,answer
+indus10,4690,"Auto parts, accessories, and tire stores",answer
+indus10,4770,Furniture and home furnishings stores,answer
+indus10,4780,Household appliance stores,answer
+indus10,4790,"Radio, TV, and computer stores",answer
+indus10,4870,Building material and supplies dealers,answer
+indus10,4880,Hardware stores,answer
+indus10,4890,Lawn and garden equipment and supplies stores,answer
+indus10,4970,Grocery stores,answer
+indus10,4980,Specialty food stores,answer
+indus10,4990,"Beer, wine, and liquor stores",answer
+indus10,5070,Pharmacies and drug stores,answer
+indus10,5080,"Health and personal care, except drug, stores",answer
+indus10,5090,Gasoline stations,answer
+indus10,5170,Clothing stores,answer
+indus10,5180,Shoe stores,answer
+indus10,5190,"Jewelry, luggage, and leather goods stores",answer
+indus10,5270,"Sporting goods, camera, and hobby and toy stores",answer
+indus10,5280,"Sewing, needlework, and piece goods stores",answer
+indus10,5290,Music stores,answer
+indus10,5370,Book stores and news dealers,answer
+indus10,5380,Department stores and discount stores,answer
+indus10,5390,Miscellaneous general merchandise stores,answer
+indus10,5470,Retail florists,answer
+indus10,5480,Office supplies and stationery stores,answer
+indus10,5490,Used merchandise stores,answer
+indus10,5570,"Gift, novelty, and souvenir shops",answer
+indus10,5580,Miscellaneous retail stores,answer
+indus10,5590,Electronic shopping,answer
+indus10,5591,Electronic auctions,answer
+indus10,5592,Mail order houses,answer
+indus10,5670,Vending machine operators,answer
+indus10,5680,Fuel dealers,answer
+indus10,5690,Other direct selling establishments,answer
+indus10,5790,Not specified retail trade,answer
+indus10,6070,Air transportation,answer
+indus10,6080,Rail transportation,answer
+indus10,6090,Water transportation,answer
+indus10,6170,Truck transportation,answer
+indus10,6180,Bus service and urban transit,answer
+indus10,6190,Taxi and limousine service,answer
+indus10,6270,Pipeline transportation,answer
+indus10,6280,Scenic and sightseeing transportation,answer
+indus10,6290,Services incidental to transportation,answer
+indus10,6370,Postal Service,answer
+indus10,6380,Couriers and messengers,answer
+indus10,6390,Warehousing and storage,answer
+indus10,6470,Newspaper publishers,answer
+indus10,6480,"Periodical, book, and directory publishers",answer
+indus10,6490,Software publishers,answer
+indus10,6570,Motion pictures and video industries,answer
+indus10,6590,Sound recording industries,answer
+indus10,6670,Radio and television broadcasting and cable subscription programming,answer
+indus10,6672,Internet publishing and broadcasting and web search portals,answer
+indus10,6680,Wired telecommunications carriers,answer
+indus10,6690,Other telecommunications services,answer
+indus10,6695,"Data processing, hosting, and related services",answer
+indus10,6770,Libraries and archives,answer
+indus10,6780,Other information services,answer
+indus10,6870,Banking and related activities,answer
+indus10,6880,"Savings institutions, including credit unions",answer
+indus10,6890,Non-depository credit and related activities,answer
+indus10,6970,"Securities, commodities, funds, trusts, and other financial investments",answer
+indus10,6990,Insurance carriers and related activities,answer
+indus10,7070,Real estate,answer
+indus10,7080,Automotive equipment rental and leasing,answer
+indus10,7170,Video tape and disk rental,answer
+indus10,7180,Other consumer goods rental,answer
+indus10,7190,"Commercial, industrial, and other intangible assets rental and leasing",answer
+indus10,7270,Legal services,answer
+indus10,7280,"Accounting, tax preparation, bookkeeping, and payroll services",answer
+indus10,7290,"Architectural, engineering, and related services",answer
+indus10,7370,Specialized design services,answer
+indus10,7380,Computer systems design and related services,answer
+indus10,7390,"Management, scientific, and technical consulting services",answer
+indus10,7460,Scientific research and development services,answer
+indus10,7470,Advertising and related services,answer
+indus10,7480,Veterinary services,answer
+indus10,7490,"Other professional, scientific, and technical services",answer
+indus10,7570,Management of companies and enterprises,answer
+indus10,7580,Employment services,answer
+indus10,7590,Business support services,answer
+indus10,7670,Travel arrangements and reservation services,answer
+indus10,7680,Investigation and security services,answer
+indus10,7690,Services to buildings and dwellings,answer
+indus10,7770,Landscaping services,answer
+indus10,7780,Other administrative and other support services,answer
+indus10,7790,Waste management and remediation services,answer
+indus10,7860,Elementary and secondary schools,answer
+indus10,7870,"Colleges and universities, including junior colleges",answer
+indus10,7880,"Business, technical, and trade schools and training",answer
+indus10,7890,"Other schools and instruction, and educational support services",answer
+indus10,7970,Offices of physicians,answer
+indus10,7980,Offices of dentists,answer
+indus10,7990,Offices of chiropractors,answer
+indus10,8070,Offices of optometrists,answer
+indus10,8080,Offices of other health practitioners,answer
+indus10,8090,Outpatient care centers,answer
+indus10,8170,Home health care services,answer
+indus10,8180,Other health care services,answer
+indus10,8190,Hospitals,answer
+indus10,8270,Nursing care facilities,answer
+indus10,8290,"Residential care facilities, without nursing",answer
+indus10,8370,Individual and family services,answer
+indus10,8380,"Community food and housing, and emergency services",answer
+indus10,8390,Vocational rehabilitation services,answer
+indus10,8470,Child day care services,answer
+indus10,8560,"Independent artists, performing arts, spectator sports, and related industries",answer
+indus10,8570,"Museums, art galleries, historical sites, and similar institutions",answer
+indus10,8580,Bowling centers,answer
+indus10,8590,"Other amusement, gambling, and recreation industries",answer
+indus10,8660,Traveler accommodation,answer
+indus10,8670,"Recreational vehicle parks and camps, and rooming and boarding houses",answer
+indus10,8680,Restaurants and other food services,answer
+indus10,8690,"Drinking places, alcoholic beverages",answer
+indus10,8770,Automotive repair and maintenance,answer
+indus10,8780,Car washes,answer
+indus10,8790,Electronic and precision equipment repair and maintenance,answer
+indus10,8870,Commercial and industrial machinery and equipment repair and maintenance,answer
+indus10,8880,Personal and household goods repair and maintenance,answer
+indus10,8890,Footwear and leather goods repair,answer
+indus10,8970,Barber shops,answer
+indus10,8980,Beauty salons,answer
+indus10,8990,Nail salons and other personal care services,answer
+indus10,9070,Drycleaning and laundry services,answer
+indus10,9080,"Funeral homes, and cemeteries and crematories",answer
+indus10,9090,Other personal services,answer
+indus10,9160,Religious organizations,answer
+indus10,9170,"Civic, social, advocacy organizations, and grantmaking and giving services",answer
+indus10,9180,Labor unions,answer
+indus10,9190,"Business, professional, political, and similar organizations",answer
+indus10,9290,Private households,answer
+indus10,9370,Executive offices and legislative bodies,answer
+indus10,9380,Public finance activities,answer
+indus10,9390,Other general government and support,answer
+indus10,9470,"Justice, public order, and safety activities",answer
+indus10,9480,Administration of human resource programs,answer
+indus10,9490,Administration of environmental quality and housing programs,answer
+indus10,9570,Administration of economic programs and space research,answer
+indus10,9590,National security and international affairs,answer
+indus10,9670,U.S. Army,answer
+indus10,9680,U.S. Air Force,answer
+indus10,9690,U.S. Navy,answer
+indus10,9770,U.S. Marine Corps,answer
+indus10,9780,U.S. Coast Guard,answer
+indus10,9790,U.S. Armed Forces/n.s.,answer
+indus10,9870,"Active duty military personnel, all other",answer
+indus10,9890,Uncodeable,uncodable
+indus10,9997,Uncodeable,uncodable
+inttech,-100,.i:  Inapplicable,inapplicable
+inttech,-99,.n:  No answer,no_answer
+inttech,-98,.d:  Do not Know/Cannot Choose,dont_know
+inttech,-97,.s:  Skipped on Web,skipped_web
+inttech,-96,.z:  Variable-specific reserve code,reserved
+inttech,-95,.u:  Uncodable,uncodable
+inttech,-90,.r:  Refused,refused
+inttech,-80,.x:  Not available in this release,unavailable_release
+inttech,-70,.y:  Not available in this year,not_asked_year
+inttech,-60,.j:  I do not have a job,no_job
+inttech,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+inttech,-40,".m:  DK, NA, IAP",mixed_missing
+inttech,1,Very interested,answer
+inttech,2,Moderately interested,answer
+inttech,3,Not at all interested,answer
+mode,-100,.i:  Inapplicable,inapplicable
+mode,-99,.n:  No answer,no_answer
+mode,-98,.d:  Do not Know/Cannot Choose,dont_know
+mode,-97,.s:  Skipped on Web,skipped_web
+mode,-96,.z:  Variable-specific reserve code,reserved
+mode,-95,.u:  Uncodable,uncodable
+mode,-94,.q:  Not imputable,not_imputable
+mode,-93,.f:  Missing Birthdate Information,missing_birthdate
+mode,-90,.r:  Refused,refused
+mode,-80,.x:  Not available in this release,unavailable_release
+mode,-70,.y:  Not available in this year,not_asked_year
+mode,-60,.j:  I do not have a job,no_job
+mode,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+mode,-40,".m:  DK, NA, IAP",mixed_missing
+mode,1,In-person,answer
+mode,2,By phone,answer
+mode,3,Multimode,answer
+mode,4,Web,answer
+news,-100,.i:  Inapplicable,inapplicable
+news,-99,.n:  No answer,no_answer
+news,-98,.d:  Do not Know/Cannot Choose,dont_know
+news,-97,.s:  Skipped on Web,skipped_web
+news,-96,.z:  Variable-specific reserve code,reserved
+news,-95,.u:  Uncodable,uncodable
+news,-90,.r:  Refused,refused
+news,-80,.x:  Not available in this release,unavailable_release
+news,-70,.y:  Not available in this year,not_asked_year
+news,-60,.j:  I do not have a job,no_job
+news,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+news,-40,".m:  DK, NA, IAP",mixed_missing
+news,1,Every day,answer
+news,2,A few times a week,answer
+news,3,Once a week,answer
+news,4,Less than once a week,answer
+news,5,Never,answer
+postlife,-100,.i:  Inapplicable,inapplicable
+postlife,-99,.n:  No answer,no_answer
+postlife,-98,.d:  Do not Know/Cannot Choose,dont_know
+postlife,-97,.s:  Skipped on Web,skipped_web
+postlife,-96,.z:  Variable-specific reserve code,reserved
+postlife,-95,.u:  Uncodable,uncodable
+postlife,-90,.r:  Refused,refused
+postlife,-80,.x:  Not available in this release,unavailable_release
+postlife,-70,.y:  Not available in this year,not_asked_year
+postlife,-60,.j:  I do not have a job,no_job
+postlife,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+postlife,-40,".m:  DK, NA, IAP",mixed_missing
+postlife,1,YES,answer
+postlife,2,NO,answer
+pray,-100,.i:  Inapplicable,inapplicable
+pray,-99,.n:  No answer,no_answer
+pray,-98,.d:  Do not Know/Cannot Choose,dont_know
+pray,-97,.s:  Skipped on Web,skipped_web
+pray,-96,.z:  Variable-specific reserve code,reserved
+pray,-95,.u:  Uncodable,uncodable
+pray,-90,.r:  Refused,refused
+pray,-80,.x:  Not available in this release,unavailable_release
+pray,-70,.y:  Not available in this year,not_asked_year
+pray,-60,.j:  I do not have a job,no_job
+pray,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+pray,-40,".m:  DK, NA, IAP",mixed_missing
+pray,1,Several times a day,answer
+pray,2,Once a day,answer
+pray,3,Several times a week,answer
+pray,4,Once a week,answer
+pray,5,Less than once a week,answer
+pray,6,Never,answer
+region,-100,.i:  Inapplicable,inapplicable
+region,-99,.n:  No answer,no_answer
+region,-98,.d:  Do not Know/Cannot Choose,dont_know
+region,-97,.s:  Skipped on Web,skipped_web
+region,-96,.z:  Variable-specific reserve code,reserved
+region,-95,.u:  Uncodable,uncodable
+region,-94,.q:  Not imputable,not_imputable
+region,-93,.f:  Missing Birthdate Information,missing_birthdate
+region,-90,.r:  Refused,refused
+region,-80,.x:  Not available in this release,unavailable_release
+region,-70,.y:  Not available in this year,not_asked_year
+region,-60,.j:  I do not have a job,no_job
+region,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+region,-40,".m:  DK, NA, IAP",mixed_missing
+region,1,Northeast,answer
+region,2,Midwest,answer
+region,3,South,answer
+region,4,West,answer
+region,5,South Atlantic,answer
+region,6,East South Central,answer
+region,7,West South Central,answer
+region,8,Mountain,answer
+region,9,Pacific,answer
+relig,-100,.i:  Inapplicable,inapplicable
+relig,-99,.n:  No answer,no_answer
+relig,-98,.d:  Do not Know/Cannot Choose,dont_know
+relig,-97,.s:  Skipped on Web,skipped_web
+relig,-96,.z:  Variable-specific reserve code,reserved
+relig,-95,.u:  Uncodable,uncodable
+relig,-94,.q:  Not imputable,not_imputable
+relig,-93,.f:  Missing Birthdate Information,missing_birthdate
+relig,-90,.r:  Refused,refused
+relig,-80,.x:  Not available in this release,unavailable_release
+relig,-70,.y:  Not available in this year,not_asked_year
+relig,-60,.j:  I do not have a job,no_job
+relig,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+relig,-40,".m:  DK, NA, IAP",mixed_missing
+relig,1,Protestant,answer
+relig,2,Catholic,answer
+relig,3,Jewish,answer
+relig,4,None,answer
+relig,5,Other,answer
+relig,6,Buddhism,answer
+relig,7,Hinduism,answer
+relig,8,Other Eastern religions,answer
+relig,9,Muslim/Islam,answer
+relig,10,Orthodox-Christian,answer
+relig,11,Christian,answer
+relig,12,Native American,answer
+relig,13,Inter-Nondenominational,answer
+relig16,-100,.i:  Inapplicable,inapplicable
+relig16,-99,.n:  No answer,no_answer
+relig16,-98,.d:  Do not Know/Cannot Choose,dont_know
+relig16,-97,.s:  Skipped on Web,skipped_web
+relig16,-96,.z:  Variable-specific reserve code,reserved
+relig16,-95,.u:  Uncodable,uncodable
+relig16,-94,.q:  Not imputable,not_imputable
+relig16,-93,.f:  Missing Birthdate Information,missing_birthdate
+relig16,-90,.r:  Refused,refused
+relig16,-80,.x:  Not available in this release,unavailable_release
+relig16,-70,.y:  Not available in this year,not_asked_year
+relig16,-60,.j:  I do not have a job,no_job
+relig16,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+relig16,-40,".m:  DK, NA, IAP",mixed_missing
+relig16,1,Protestant,answer
+relig16,2,Catholic,answer
+relig16,3,Jewish,answer
+relig16,4,None,answer
+relig16,5,Other,answer
+relig16,6,Buddhism,answer
+relig16,7,Hinduism,answer
+relig16,8,Other Eastern religions,answer
+relig16,9,Muslim/Islam,answer
+relig16,10,Orthodox-Christian,answer
+relig16,11,Christian,answer
+relig16,12,Native American,answer
+relig16,13,Inter-Nondenominational,answer
+reliten,-100,.i:  Inapplicable,inapplicable
+reliten,-99,.n:  No answer,no_answer
+reliten,-98,.d:  Do not Know/Cannot Choose,dont_know
+reliten,-97,.s:  Skipped on Web,skipped_web
+reliten,-96,.z:  Variable-specific reserve code,reserved
+reliten,-95,.u:  Uncodable,uncodable
+reliten,-94,.q:  Not imputable,not_imputable
+reliten,-93,.f:  Missing Birthdate Information,missing_birthdate
+reliten,-90,.r:  Refused,refused
+reliten,-80,.x:  Not available in this release,unavailable_release
+reliten,-70,.y:  Not available in this year,not_asked_year
+reliten,-60,.j:  I do not have a job,no_job
+reliten,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+reliten,-40,".m:  DK, NA, IAP",mixed_missing
+reliten,1,Strong,answer
+reliten,2,Not very strong,answer
+reliten,3,Somewhat strong (Vol.),answer
+reliten,4,No religion,answer
+satjob,-100,.i:  Inapplicable,inapplicable
+satjob,-99,.n:  No answer,no_answer
+satjob,-98,.d:  Do not Know/Cannot Choose,dont_know
+satjob,-97,.s:  Skipped on Web,skipped_web
+satjob,-96,.z:  Variable-specific reserve code,reserved
+satjob,-95,.u:  Uncodable,uncodable
+satjob,-90,.r:  Refused,refused
+satjob,-80,.x:  Not available in this release,unavailable_release
+satjob,-70,.y:  Not available in this year,not_asked_year
+satjob,-60,.j:  I do not have a job,no_job
+satjob,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+satjob,-40,".m:  DK, NA, IAP",mixed_missing
+satjob,1,Very satisfied,answer
+satjob,2,Moderately satisfied,answer
+satjob,3,A little dissatisfied,answer
+satjob,4,Very dissatisfied,answer
+sex,-100,.i:  Inapplicable,inapplicable
+sex,-99,.n:  No answer,no_answer
+sex,-98,.d:  Do not Know/Cannot Choose,dont_know
+sex,-97,.s:  Skipped on Web,skipped_web
+sex,-96,.z:  Variable-specific reserve code,reserved
+sex,-95,.u:  Uncodable,uncodable
+sex,-90,.r:  Refused,refused
+sex,-80,.x:  Not available in this release,unavailable_release
+sex,-70,.y:  Not available in this year,not_asked_year
+sex,-60,.j:  I do not have a job,no_job
+sex,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+sex,-40,".m:  DK, NA, IAP",mixed_missing
+sex,1,MALE,answer
+sex,2,FEMALE,answer
+tvhours,-100,.i:  Inapplicable,inapplicable
+tvhours,-99,.n:  No answer,no_answer
+tvhours,-98,.d:  Do not Know/Cannot Choose,dont_know
+tvhours,-97,.s:  Skipped on Web,skipped_web
+tvhours,-96,.z:  Variable-specific reserve code,reserved
+tvhours,-95,.u:  Uncodable,uncodable
+tvhours,-90,.r:  Refused,refused
+tvhours,-80,.x:  Not available in this release,unavailable_release
+tvhours,-70,.y:  Not available in this year,not_asked_year
+tvhours,-60,.j:  I do not have a job,no_job
+tvhours,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+tvhours,-40,".m:  DK, NA, IAP",mixed_missing
+tvhours,0,0 hours,answer
+tvhours,24,24 hours,answer
+usewww,-100,.i:  Inapplicable,inapplicable
+usewww,-99,.n:  No answer,no_answer
+usewww,-98,.d:  Do not Know/Cannot Choose,dont_know
+usewww,-97,.s:  Skipped on Web,skipped_web
+usewww,-96,.z:  Variable-specific reserve code,reserved
+usewww,-95,.u:  Uncodable,uncodable
+usewww,-90,.r:  Refused,refused
+usewww,-80,.x:  Not available in this release,unavailable_release
+usewww,-70,.y:  Not available in this year,not_asked_year
+usewww,-60,.j:  I do not have a job,no_job
+usewww,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+usewww,-40,".m:  DK, NA, IAP",mixed_missing
+usewww,1,YES,answer
+usewww,2,NO,answer
+webmob,-100,.i:  Inapplicable,inapplicable
+webmob,-99,.n:  No answer,no_answer
+webmob,-98,.d:  Do not Know/Cannot Choose,dont_know
+webmob,-97,.s:  Skipped on Web,skipped_web
+webmob,-96,.z:  Variable-specific reserve code,reserved
+webmob,-95,.u:  Uncodable,uncodable
+webmob,-90,.r:  Refused,refused
+webmob,-80,.x:  Not available in this release,unavailable_release
+webmob,-70,.y:  Not available in this year,not_asked_year
+webmob,-60,.j:  I do not have a job,no_job
+webmob,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+webmob,-40,".m:  DK, NA, IAP",mixed_missing
+webmob,1,Yes,answer
+webmob,2,No,answer
+wrkstat,-100,.i:  Inapplicable,inapplicable
+wrkstat,-99,.n:  No answer,no_answer
+wrkstat,-98,.d:  Do not Know/Cannot Choose,dont_know
+wrkstat,-97,.s:  Skipped on Web,skipped_web
+wrkstat,-96,.z:  Variable-specific reserve code,reserved
+wrkstat,-95,.u:  Uncodable,uncodable
+wrkstat,-90,.r:  Refused,refused
+wrkstat,-80,.x:  Not available in this release,unavailable_release
+wrkstat,-70,.y:  Not available in this year,not_asked_year
+wrkstat,-60,.j:  I do not have a job,no_job
+wrkstat,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+wrkstat,-40,".m:  DK, NA, IAP",mixed_missing
+wrkstat,1,Working full time,answer
+wrkstat,2,Working part time,answer
+wrkstat,3,"With a job, but not at work because of temporary illness, vacation, strike",answer
+wrkstat,4,"Unemployed, laid off, looking for work",answer
+wrkstat,5,Retired,answer
+wrkstat,6,In school,answer
+wrkstat,7,Keeping house,answer
+wrkstat,8,Other,answer
+wtssps,-100,.i:  Inapplicable,inapplicable
+wwwhr,-100,.i:  Inapplicable,inapplicable
+wwwhr,-99,.n:  No answer,no_answer
+wwwhr,-98,.d:  Do not Know/Cannot Choose,dont_know
+wwwhr,-97,.s:  Skipped on Web,skipped_web
+wwwhr,-96,.z:  Variable-specific reserve code,reserved
+wwwhr,-95,.u:  Uncodable,uncodable
+wwwhr,-94,.q:  Not imputable,not_imputable
+wwwhr,-93,.f:  Missing Birthdate Information,missing_birthdate
+wwwhr,-90,.r:  Refused,refused
+wwwhr,-80,.x:  Not available in this release,unavailable_release
+wwwhr,-70,.y:  Not available in this year,not_asked_year
+wwwhr,-60,.j:  I do not have a job,no_job
+wwwhr,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+wwwhr,-40,".m:  DK, NA, IAP",mixed_missing
+wwwhr,0,0 hours,answer
+wwwhr,168,168 hours,answer
+wwwmin,-100,.i:  Inapplicable,inapplicable
+wwwmin,-99,.n:  No answer,no_answer
+wwwmin,-98,.d:  Do not Know/Cannot Choose,dont_know
+wwwmin,-97,.s:  Skipped on Web,skipped_web
+wwwmin,-96,.z:  Variable-specific reserve code,reserved
+wwwmin,-95,.u:  Uncodable,uncodable
+wwwmin,-90,.r:  Refused,refused
+wwwmin,-80,.x:  Not available in this release,unavailable_release
+wwwmin,-70,.y:  Not available in this year,not_asked_year
+wwwmin,-60,.j:  I do not have a job,no_job
+wwwmin,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+wwwmin,-40,".m:  DK, NA, IAP",mixed_missing
+wwwmin,0,0 minutes,answer
+wwwmin,59,59 minutes,answer
+year,-100,.i:  Inapplicable,inapplicable
+year,-99,.n:  No answer,no_answer
+year,-98,.d:  Do not Know/Cannot Choose,dont_know
+year,-97,.s:  Skipped on Web,skipped_web
+year,-96,.z:  Variable-specific reserve code,reserved
+year,-95,.u:  Uncodable,uncodable
+year,-94,.q:  Not imputable,not_imputable
+year,-93,.f:  Missing Birthdate Information,missing_birthdate
+year,-90,.r:  Refused,refused
+year,-80,.x:  Not available in this release,unavailable_release
+year,-70,.y:  Not available in this year,not_asked_year
+year,-60,.j:  I do not have a job,no_job
+year,-50,.p:  Not applicable (I have not faced this decision)/Not imputable,not_applicable_or_imputable
+year,-40,".m:  DK, NA, IAP",mixed_missing

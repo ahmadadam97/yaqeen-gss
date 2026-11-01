@@ -1,0 +1,7 @@
+gss:
+  target: local
+  outputs:
+    local:
+      type: duckdb
+      path: "{{ env_var('GSS_DB', '../build/gss.duckdb') }}"
+      threads: 1
