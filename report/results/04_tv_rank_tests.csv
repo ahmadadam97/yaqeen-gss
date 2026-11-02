@@ -1,0 +1,2 @@
+n,satisfaction_groups,rho,spearman_p,kw_h,kw_p,scoring,inference
+2845,4,-0.01065,0.57017,2.67514,0.44447,higher rank = more satisfied,unweighted; assumes independent observations

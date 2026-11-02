@@ -25,11 +25,15 @@ class LoadTests(unittest.TestCase):
             write(b, "Every day")
             load(con, [a])
             with self.assertRaisesRegex(ValueError, "conflicting overlap"):
-                load(con, [b])
+                load(con, [a, b])
             self.assertEqual(con.execute("select count(*) from raw.files").fetchone(), (1,))
             self.assertEqual(con.execute("select count(*) from raw.records").fetchone(), (1,))
             write(b, "Never")
-            load(con, [b])
+            with self.assertRaisesRegex(ValueError, "identical content"):
+                load(con, [a, b])
+            with self.assertRaisesRegex(ValueError, "missing or renamed"):
+                load(con, [b])
+            load(con, [a])
             self.assertEqual(con.execute("select count(*) from raw.records").fetchone(), (1,))
 
     def test_real_cuts_in_either_order_and_twice(self):

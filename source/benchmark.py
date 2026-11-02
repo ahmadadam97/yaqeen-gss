@@ -28,8 +28,10 @@ if __name__ == "__main__":
         results = []
         for f in sorted((ROOT / "source/sql").glob("*.sql")):
             sql = f.read_text(encoding="utf8")
-            before = sql.replace("from respondents", "from baseline_interviews").replace(
-                "from stg_membership", "from baseline_membership")
+            before = sql.replace("from stg_membership", "from baseline_membership")
+            if not f.name.startswith("07"):
+                before = before.replace("from respondents", "from baseline_interviews").replace(
+                    "join respondents", "join baseline_interviews")
             ms, rows = measure(con, before)
             results.append((ms, f.name, before, sql, rows))
         ms, name, before, after, rows = max(results, key=lambda result: result[0])
@@ -41,5 +43,6 @@ if __name__ == "__main__":
                  f"Before: {ms:.2f} ms; after: {after_ms:.2f} ms; equal result rows: {len(rows)}."]
         for label, sql in (("BEFORE",before),("AFTER",after)):
             lines.extend([label, con.execute("explain analyze " + sql).fetchone()[1]])
-        (out / "query-plans.txt").write_text("\n".join(lines), encoding="utf8")
+        plan_text = "\n".join(part.rstrip() for part in "\n".join(lines).splitlines()) + "\n"
+        (out / "query-plans.txt").write_text(plan_text, encoding="utf8")
         print("\n".join(lines[:4]))

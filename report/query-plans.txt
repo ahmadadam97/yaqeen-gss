@@ -1,17 +1,17 @@
 Slowest baseline: 07_overlap.sql
 Single thread, median of 3 warm runs; durations include fetching rows.
-Baseline ms: 01_prayer.sql 61.08, 02_afterlife.sql 46.56, 03_industry.sql 63.44, 04_tv_satisfaction.sql 54.58, 05_ever_work.sql 41.74, 06_wave_changes.sql 47.52, 07_overlap.sql 90.87
-Before: 90.87 ms; after: 7.97 ms; equal result rows: 1.
+Baseline ms: 01_prayer.sql 17.00, 02_afterlife.sql 11.69, 03_industry.sql 14.96, 04_tv_satisfaction.sql 12.43, 05_ever_work.sql 11.48, 06_wave_changes.sql 12.33, 07_overlap.sql 24.74, 08_technology_interest.sql 22.44, 09_ballot_coverage.sql 17.12
+Before: 24.74 ms; after: 3.76 ms; equal result rows: 1.
 BEFORE
 ┌─────────────────────────────────────┐
 │┌───────────────────────────────────┐│
 ││    Query Profiling Information    ││
 │└───────────────────────────────────┘│
 └─────────────────────────────────────┘
-explain analyze with membership as (     select survey_year, respondent_id,            bool_or(filename='yaqeen_cut_a_2014_2016.json') as in_a,            bool_or(filename='yaqeen_cut_b_2016_2018.json') as in_b     from baseline_membership group by all ), counts as (     select count(*) filter (where in_a) as a, count(*) filter (where in_b) as b,            count(*) filter (where in_a and in_b) as shared, count(*) filter (where in_a or in_b) as distinct_n     from membership ) select *, round(100.0*shared/nullif(a,0),2) as pct_a, round(100.0*shared/nullif(b,0),2) as pct_b from counts 
+explain analyze with membership as (     select survey_year, respondent_id,            bool_or(filename='yaqeen_cut_a_2014_2016.json') as in_a,            bool_or(filename='yaqeen_cut_b_2016_2018.json') as in_b     from baseline_membership group by all ), counts as (     select count(*) filter (where in_a) as a, count(*) filter (where in_b) as b,            count(*) filter (where in_a and in_b) as shared, count(*) filter (where in_a or in_b) as distinct_n     from membership ), grain as (     select count(*) as analysis_rows, count(distinct (survey_year,respondent_id)) as distinct_interview_keys,            count(distinct respondent_id) as distinct_ids_alone from respondents ) select *, round(100.0*shared/nullif(a,0),2) as pct_a, round(100.0*shared/nullif(b,0),2) as pct_b,        analysis_rows-distinct_interview_keys as duplicate_analysis_rows,        distinct_interview_keys-distinct_ids_alone as interviews_lost_using_id_alone from counts cross join grain
 ┌────────────────────────────────────────────────┐
 │┌──────────────────────────────────────────────┐│
-││              Total Time: 0.100s              ││
+││              Total Time: 0.0252s             ││
 │└──────────────────────────────────────────────┘│
 └────────────────────────────────────────────────┘
 ┌───────────────────────────┐
@@ -30,8 +30,14 @@ explain analyze with membership as (     select survey_year, respondent_id,     
 │             b             │
 │           shared          │
 │         distinct_n        │
+│       analysis_rows       │
+│  distinct_interview_keys  │
+│     distinct_ids_alone    │
 │           pct_a           │
 │           pct_b           │
+│  duplicate_analysis_rows  │
+│interviews_lost_using_id_al│
+│            one            │
 │                           │
 │           1 row           │
 │          (0.00s)          │
@@ -43,6 +49,9 @@ explain analyze with membership as (     select survey_year, respondent_id,     
 │             b             │
 │           shared          │
 │         distinct_n        │
+│       analysis_rows       │
+│  distinct_interview_keys  │
+│     distinct_ids_alone    │
 │ CAST((100.0 * CAST(shared │
 │    AS DECIMAL(23,0))) AS  │
 │           DOUBLE)         │
@@ -51,41 +60,51 @@ explain analyze with membership as (     select survey_year, respondent_id,     
 │          (0.00s)          │
 └─────────────┬─────────────┘
 ┌─────────────┴─────────────┐
-│    UNGROUPED_AGGREGATE    │
+│       CROSS_PRODUCT       │
 │    ────────────────────   │
-│        Aggregates:        │
-│ count_star() FILTER (WHERE│
-│       #0) Filter: #0      │
-│ count_star() FILTER (WHERE│
-│       #1) Filter: #1      │
-│ count_star() FILTER (WHERE│
-│       #2) Filter: #2      │
-│ count_star() FILTER (WHERE│
-│       #3) Filter: #3      │
-│                           │
-│           1 row           │
-│          (0.00s)          │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│         PROJECTION        │
-│    ────────────────────   │
-│            in_a           │
-│            in_b           │
-│      (in_a AND in_b)      │
-│       (in_a OR in_b)      │
-│                           │
-│         7,753 rows        │
-│          (0.00s)          │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│         PROJECTION        │
-│    ────────────────────   │
-│            in_a           │
-│            in_b           │
-│                           │
-│         7,753 rows        │
-│          (0.00s)          │
-└─────────────┬─────────────┘
+│           1 row           ├──────────────┐
+│          (0.00s)          │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│    UNGROUPED_AGGREGATE    ││    UNGROUPED_AGGREGATE    │
+│    ────────────────────   ││    ────────────────────   │
+│        Aggregates:        ││        Aggregates:        │
+│ count_star() FILTER (WHERE││        count_star()       │
+│       #0) Filter: #0      ││     count(DISTINCT #0)    │
+│ count_star() FILTER (WHERE││     count(DISTINCT #1)    │
+│       #1) Filter: #1      ││                           │
+│ count_star() FILTER (WHERE││                           │
+│       #2) Filter: #2      ││                           │
+│ count_star() FILTER (WHERE││                           │
+│       #3) Filter: #3      ││                           │
+│                           ││                           │
+│           1 row           ││           1 row           │
+│          (0.00s)          ││          (0.00s)          │
+└─────────────┬─────────────┘└─────────────┬─────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         PROJECTION        ││         PROJECTION        │
+│    ────────────────────   ││    ────────────────────   │
+│            in_a           ││     "row"(survey_year,    │
+│            in_b           ││       respondent_id)      │
+│      (in_a AND in_b)      ││       respondent_id       │
+│       (in_a OR in_b)      ││                           │
+│                           ││                           │
+│         7,753 rows        ││         7,753 rows        │
+│          (0.00s)          ││          (0.00s)          │
+└─────────────┬─────────────┘└─────────────┬─────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         PROJECTION        ││         TABLE_SCAN        │
+│    ────────────────────   ││    ────────────────────   │
+│            in_a           ││     Table: respondents    │
+│            in_b           ││   Type: Sequential Scan   │
+│                           ││                           │
+│                           ││        Projections:       │
+│                           ││        survey_year        │
+│                           ││       respondent_id       │
+│                           ││                           │
+│         7,753 rows        ││         7,753 rows        │
+│          (0.00s)          ││          (0.00s)          │
+└─────────────┬─────────────┘└───────────────────────────┘
 ┌─────────────┴─────────────┐
 │       HASH_GROUP_BY       │
 │    ────────────────────   │
@@ -123,7 +142,7 @@ explain analyze with membership as (     select survey_year, respondent_id,     
 │       respondent_id       │
 │                           │
 │        10,620 rows        │
-│          (0.08s)          │
+│          (0.02s)          │
 └─────────────┬─────────────┘
 ┌─────────────┴─────────────┐
 │         TABLE_SCAN        │
@@ -136,7 +155,7 @@ explain analyze with membership as (     select survey_year, respondent_id,     
 │          payload          │
 │                           │
 │        10,620 rows        │
-│          (0.01s)          │
+│          (0.00s)          │
 └───────────────────────────┘
 
 AFTER
@@ -145,10 +164,10 @@ AFTER
 ││    Query Profiling Information    ││
 │└───────────────────────────────────┘│
 └─────────────────────────────────────┘
-explain analyze with membership as (     select survey_year, respondent_id,            bool_or(filename='yaqeen_cut_a_2014_2016.json') as in_a,            bool_or(filename='yaqeen_cut_b_2016_2018.json') as in_b     from stg_membership group by all ), counts as (     select count(*) filter (where in_a) as a, count(*) filter (where in_b) as b,            count(*) filter (where in_a and in_b) as shared, count(*) filter (where in_a or in_b) as distinct_n     from membership ) select *, round(100.0*shared/nullif(a,0),2) as pct_a, round(100.0*shared/nullif(b,0),2) as pct_b from counts 
+explain analyze with membership as (     select survey_year, respondent_id,            bool_or(filename='yaqeen_cut_a_2014_2016.json') as in_a,            bool_or(filename='yaqeen_cut_b_2016_2018.json') as in_b     from stg_membership group by all ), counts as (     select count(*) filter (where in_a) as a, count(*) filter (where in_b) as b,            count(*) filter (where in_a and in_b) as shared, count(*) filter (where in_a or in_b) as distinct_n     from membership ), grain as (     select count(*) as analysis_rows, count(distinct (survey_year,respondent_id)) as distinct_interview_keys,            count(distinct respondent_id) as distinct_ids_alone from respondents ) select *, round(100.0*shared/nullif(a,0),2) as pct_a, round(100.0*shared/nullif(b,0),2) as pct_b,        analysis_rows-distinct_interview_keys as duplicate_analysis_rows,        distinct_interview_keys-distinct_ids_alone as interviews_lost_using_id_alone from counts cross join grain
 ┌────────────────────────────────────────────────┐
 │┌──────────────────────────────────────────────┐│
-││              Total Time: 0.0118s             ││
+││              Total Time: 0.0047s             ││
 │└──────────────────────────────────────────────┘│
 └────────────────────────────────────────────────┘
 ┌───────────────────────────┐
@@ -167,8 +186,14 @@ explain analyze with membership as (     select survey_year, respondent_id,     
 │             b             │
 │           shared          │
 │         distinct_n        │
+│       analysis_rows       │
+│  distinct_interview_keys  │
+│     distinct_ids_alone    │
 │           pct_a           │
 │           pct_b           │
+│  duplicate_analysis_rows  │
+│interviews_lost_using_id_al│
+│            one            │
 │                           │
 │           1 row           │
 │          (0.00s)          │
@@ -180,6 +205,9 @@ explain analyze with membership as (     select survey_year, respondent_id,     
 │             b             │
 │           shared          │
 │         distinct_n        │
+│       analysis_rows       │
+│  distinct_interview_keys  │
+│     distinct_ids_alone    │
 │ CAST((100.0 * CAST(shared │
 │    AS DECIMAL(23,0))) AS  │
 │           DOUBLE)         │
@@ -188,41 +216,51 @@ explain analyze with membership as (     select survey_year, respondent_id,     
 │          (0.00s)          │
 └─────────────┬─────────────┘
 ┌─────────────┴─────────────┐
-│    UNGROUPED_AGGREGATE    │
+│       CROSS_PRODUCT       │
 │    ────────────────────   │
-│        Aggregates:        │
-│ count_star() FILTER (WHERE│
-│       #0) Filter: #0      │
-│ count_star() FILTER (WHERE│
-│       #1) Filter: #1      │
-│ count_star() FILTER (WHERE│
-│       #2) Filter: #2      │
-│ count_star() FILTER (WHERE│
-│       #3) Filter: #3      │
-│                           │
-│           1 row           │
-│          (0.00s)          │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│         PROJECTION        │
-│    ────────────────────   │
-│            in_a           │
-│            in_b           │
-│      (in_a AND in_b)      │
-│       (in_a OR in_b)      │
-│                           │
-│         7,753 rows        │
-│          (0.00s)          │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│         PROJECTION        │
-│    ────────────────────   │
-│            in_a           │
-│            in_b           │
-│                           │
-│         7,753 rows        │
-│          (0.00s)          │
-└─────────────┬─────────────┘
+│           1 row           ├──────────────┐
+│          (0.00s)          │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│    UNGROUPED_AGGREGATE    ││    UNGROUPED_AGGREGATE    │
+│    ────────────────────   ││    ────────────────────   │
+│        Aggregates:        ││        Aggregates:        │
+│ count_star() FILTER (WHERE││        count_star()       │
+│       #0) Filter: #0      ││     count(DISTINCT #0)    │
+│ count_star() FILTER (WHERE││     count(DISTINCT #1)    │
+│       #1) Filter: #1      ││                           │
+│ count_star() FILTER (WHERE││                           │
+│       #2) Filter: #2      ││                           │
+│ count_star() FILTER (WHERE││                           │
+│       #3) Filter: #3      ││                           │
+│                           ││                           │
+│           1 row           ││           1 row           │
+│          (0.00s)          ││          (0.00s)          │
+└─────────────┬─────────────┘└─────────────┬─────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         PROJECTION        ││         PROJECTION        │
+│    ────────────────────   ││    ────────────────────   │
+│            in_a           ││     "row"(survey_year,    │
+│            in_b           ││       respondent_id)      │
+│      (in_a AND in_b)      ││       respondent_id       │
+│       (in_a OR in_b)      ││                           │
+│                           ││                           │
+│         7,753 rows        ││         7,753 rows        │
+│          (0.00s)          ││          (0.00s)          │
+└─────────────┬─────────────┘└─────────────┬─────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         PROJECTION        ││         TABLE_SCAN        │
+│    ────────────────────   ││    ────────────────────   │
+│            in_a           ││     Table: respondents    │
+│            in_b           ││   Type: Sequential Scan   │
+│                           ││                           │
+│                           ││        Projections:       │
+│                           ││        survey_year        │
+│                           ││       respondent_id       │
+│                           ││                           │
+│         7,753 rows        ││         7,753 rows        │
+│          (0.00s)          ││          (0.00s)          │
+└─────────────┬─────────────┘└───────────────────────────┘
 ┌─────────────┴─────────────┐
 │         PROJECTION        │
 │    ────────────────────   │

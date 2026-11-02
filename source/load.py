@@ -62,15 +62,21 @@ def load(con, paths):
             create table if not exists raw.files(filename varchar primary key, sha256 varchar unique, row_count int);
             create table if not exists raw.records(filename varchar, ordinal int, payload json,
                 primary key(filename, ordinal))""")
+        known = dict(con.execute("select filename, sha256 from raw.files").fetchall())
+        missing = known.keys() - {path.name for path in paths}
+        if missing:
+            raise ValueError(f"previously loaded files missing or renamed: {sorted(missing)}")
         for path in paths:
             content = path.read_bytes()
             digest = hashlib.sha256(content).hexdigest()
-            previous = con.execute("select sha256 from raw.files where filename=?", [path.name]).fetchone()
-            if previous and previous[0] != digest:
+            previous = known.get(path.name)
+            if previous and previous != digest:
                 raise ValueError(f"{path.name} has changed; investigate the version")
-            if con.execute("select 1 from raw.files where sha256=?", [digest]).fetchone():
+            if previous == digest:
                 logging.info("skip identical %s sha256=%s", path.name, digest)
                 continue
+            if digest in known.values():
+                raise ValueError(f"{path.name}: identical content under another filename")
             try:
                 rows = read_records(content)
             except (ValueError, KeyError, TypeError, AttributeError) as exc:
@@ -81,6 +87,7 @@ def load(con, paths):
                 from (select from_json(?, '["JSON"]') as items)""",
                         [path.name, "[" + ",".join(rows) + "]"])
             logging.info("staged %s rows=%d sha256=%s", path.name, len(rows), digest)
+            known[path.name] = digest
         conflict = con.execute("""select payload->>'year' as yr, payload->>'id_' as id, field.key
             from raw.records, lateral json_each(payload) field
             group by all having count(distinct field.value) > 1 limit 1""").fetchone()

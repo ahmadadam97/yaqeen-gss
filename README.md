@@ -15,7 +15,7 @@ py -3.12 -m venv .env
 
 On macOS or Linux use `python3.12 -m venv .env` and substitute `.env/bin/python` for the interpreter above. The core run requires no credentials or cloud services. An optional GSS_DB environment variable selects the database file. Its parent directory must exist.
 
-The runner hashes and loads new raw files together in a transaction, invokes dbt build (seeds, models and tests), generates documentation, then runs the seven SQL files. A failed stage exits nonzero and stops the remaining stages. Inspect build/run.log and dbt/logs/dbt.log. Existing result files reflect the last run that wrote them. Check the most recent run status before using them. Correct the source or metadata and rerun the same command. If replacing a previously loaded file with a corrected version, retain the old raw version and rebuild into a fresh database path. There is no scheduler to operate. The trigger is a manual run after files or definitions change.
+The runner hashes and loads new raw files together in a transaction, invokes dbt build (seeds, models and tests), generates documentation, then runs the nine SQL files and the Q4 rank checks. A failed stage exits nonzero and stops the remaining stages. Inspect build/run.log and dbt/logs/dbt.log. Results are staged until every query and diagnostic succeeds. Use the CSVs only when build/results/_SUCCESS is present. It is cleared before every run and written after publication. Correct the source or metadata and rerun the same command. Both named cuts and all previously loaded files must remain in place. A renamed file or identical bytes under two filenames is rejected. For intentional source revisions, preserve old inputs separately and use a fresh database for the new, documented snapshot. There is no scheduler to operate. The trigger is a manual run after files or definitions change.
 
 ## Where to look
 
@@ -26,16 +26,21 @@ The runner hashes and loads new raw files together in a transaction, invokes dbt
 | docs/design.md and naming.md | Grain, database, transformations, assumptions and naming |
 | source/load.py and run.py | Ingestion, validations and stage ordering |
 | dbt/seeds and dbt/models | Code meanings, reviewed waves, numeric domains, interviews and answers |
-| source/sql | Six analyses and the cut membership audit |
-| report | Short report, complete query results and measured query plans |
+| source/sql | Six analyses, the membership audit, and two coverage/technology supplements |
+| source/tv_diagnostics.py | SciPy rank tests on the Q4 working sample |
+| report | Short report, [result interpretation guide](report/results/README.md), complete results and measured query plans |
 | build | Generated DuckDB file, execution log and new result CSVs |
 | dbt/target | Generated documentation, compiled SQL and test results |
 
 Run dbt commands directly from dbt/ using the environment's dbt executable with `--profiles-dir .`. Use `dbt docs serve --profiles-dir .` after the runner succeeds to browse the model documentation.
 
-Run `python source/benchmark.py` with the same environment after the pipeline to reproduce the query comparison. It times all seven queries, checks equal results for the slowest query and writes both physical plans to report/query-plans.txt. Timings depend on the machine.
+Run `python source/benchmark.py` with the same environment after the pipeline to reproduce the query comparison. It times all nine SQL queries, checks equal results for the slowest query and writes both physical plans to report/query-plans.txt. Timings depend on the machine.
 
 ## Reproduce the inputs
+
+Two consecutive runs against the same initially empty database were checked on 2 November 2026. The first loaded 10,620 raw rows from two files. The second skipped both hashes. Both runs produced 232,590 decoded answers and 7,753 interviews. SHA-256 digests of the ordered contents of all four relations (raw files, raw records, answers and respondents) matched, and all ten result CSVs were byte-identical. All five dbt data tests passed on both runs. The original seven analyses also retained every previously reported number after the extra columns and diagnostics were added. The loader's unit tests independently exercise reversed load order and rollback.
+
+### Explorer recipe
 
 In [GSS Data Explorer](https://gssdataexplorer.norc.org), create two independent extracts. Select all variables below, apply no case or complete-case filters, and select JSON plus the metadata workbook (Label). Select 2014 and 2016 for A, then 2016 and 2018 for B. Download both from MyGSS → Extracts → Actions → Download. Inside each archive open batch_0.zip and take result/post_processing_output.json unchanged. Use the cut name as its filename in source/data/raw. The companion GSS.json has equivalent records in Python literal notation. Exact exports can change when NORC publishes a new release.
 

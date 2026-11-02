@@ -1,5 +1,5 @@
-satisfaction,group_n,mean_tv_hours
-Very satisfied,1415,2.32
-Moderately satisfied,1091,2.37
-A little dissatisfied,251,2.39
-Very dissatisfied,88,2.55
+cohort,satisfaction,group_n,mean_tv_hours
+Currently working; valid TV and work satisfaction,Very satisfied,1415,2.32
+Currently working; valid TV and work satisfaction,Moderately satisfied,1091,2.37
+Currently working; valid TV and work satisfaction,A little dissatisfied,251,2.39
+Currently working; valid TV and work satisfaction,Very dissatisfied,88,2.55
