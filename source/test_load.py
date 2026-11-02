@@ -2,12 +2,32 @@ import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 
 import duckdb
 from load import ROOT, read_records, load
 
 
 class LoadTests(unittest.TestCase):
+    def test_cached_inputs_still_validate_the_codebook(self):
+        with TemporaryDirectory(dir=ROOT) as tmp, duckdb.connect() as con:
+            folder = Path(tmp)
+            seeds = folder / "dbt/seeds"
+            seeds.mkdir(parents=True)
+            (seeds / "variables.csv").write_text("variable\nnews\n")
+            book = seeds / "codebook.csv"
+            header = "variable,source_code,label\n"
+            book.write_text(header + "news,1,Every day\n")
+            raw = folder / "cut.json"
+            raw.write_text(json.dumps({"data":{"year":["2014"],"id_":[1],"news":["Every day"]},
+                "codes":{"news":{"variable_name":"news","CodeLabel":{"1":"Every day"}}}}))
+            with patch("load.ROOT", folder):
+                load(con, [raw])
+                book.write_text(header + "news,1,Never\n")
+                with self.assertRaisesRegex(ValueError, "codebook drift"):
+                    load(con, [raw])
+                self.assertEqual(con.execute("select count(*) from raw.records").fetchone(), (1,))
+
     def test_reject_bad_input(self):
         for content in ['{', '{"data":{"year":[],"year":[]}}',
                         '{"data":{"year":["2014"],"id_":[]},"codes":{}}',

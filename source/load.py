@@ -72,15 +72,15 @@ def load(con, paths):
             previous = known.get(path.name)
             if previous and previous != digest:
                 raise ValueError(f"{path.name} has changed; investigate the version")
-            if previous == digest:
-                logging.info("skip identical %s sha256=%s", path.name, digest)
-                continue
-            if digest in known.values():
+            if previous != digest and digest in known.values():
                 raise ValueError(f"{path.name}: identical content under another filename")
             try:
                 rows = read_records(content)
             except (ValueError, KeyError, TypeError, AttributeError) as exc:
                 raise ValueError(f"{path.name}: {exc}") from exc
+            if previous == digest:
+                logging.info("validated unchanged %s rows=%d sha256=%s; skip insert", path.name, len(rows), digest)
+                continue
             con.execute("insert into raw.files values (?,?,?)", [path.name, digest, len(rows)])
             con.execute("""insert into raw.records
                 select ?, generate_subscripts(items, 1), unnest(items)

@@ -27,6 +27,9 @@ def publish_results(con, sql_dir, results):
             writer = csv.DictWriter(f, fieldnames=list(diagnostic))
             writer.writeheader()
             writer.writerow(diagnostic)
+        for obsolete in results.glob("*.csv"):
+            if not (stage / obsolete.name).exists():
+                obsolete.unlink()
         for output in stage.iterdir():
             output.replace(results / output.name)
         (results / "_SUCCESS").write_text("Complete\n", encoding="utf8")

@@ -1,6 +1,6 @@
 # Reading the survey results
 
-Each row of respondents is one (survey year, respondent ID) interview. Q1-Q6 aggregate this table. Reported percentages are unweighted and denominators vary by question. See the [original pre-build profile](../../docs/profile.md) and [missing counts by variable and year](../../docs/profile.csv).
+Each row of respondents is one (survey year, respondent ID) interview. Q1-Q6 aggregate this table. Percentages are unweighted unless the column names a weight. Denominators vary by question. See the [original pre-build profile](../../docs/profile.md) and [missing counts by variable and year](../../docs/profile.csv).
 
 | File | Population and interpretation |
 |---|---|
@@ -13,3 +13,14 @@ Each row of respondents is one (survey year, respondent ID) interview. Q1-Q6 agg
 | 07_overlap | A/B membership counts and fractions plus the grain of the table underlying Q1-Q6. Using ID alone would collapse distinct interviews across waves. |
 | 08_technology_interest | Section 1 supplement. Interest in new inventions and technologies among valid answers by wave and pooled. Coverage uses all interviews as denominator. |
 | 09_ballot_coverage | Counts valid answers out of all interviews for each year, ballot and field. Ballot C has no valid NEWS, TVHOURS, COMPUSE or WWWHR in any selected year. INTTECH has a different ballot/form pattern. |
+| 10_prayer_afterlife | Belief by prayer group and wave. Counts distinguish valid prayer from valid belief. WTSSPS is primary; WTSSNRPS is a sensitivity check. This cannot establish cause or describe Muslims specifically. |
+| 11_media_by_age | Daily newspaper share and median weekly non-email web time among the same people with known age and both answers. Counts show what is lost using paired responses. Web use does not measure access or preference. |
+
+To reproduce the satisfaction rates and medians on page 3, run this against the built database. For the overall rate, sum the two satisfied categories and divide by all four categories in `answered_satisfaction`. For the TV comparison, repeat using `also_answered_tv`. A missing TV response does not exclude someone from the first rate.
+
+```sql
+select satjob, count(*) as answered_satisfaction, count(tvhours_value) as also_answered_tv,
+       median(tvhours_value) as median_daily_tv_hours
+from respondents where is_working and satjob is not null
+group by satjob order by satjob;
+```

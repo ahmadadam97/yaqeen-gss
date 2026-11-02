@@ -1,7 +1,7 @@
 Slowest baseline: 07_overlap.sql
 Single thread, median of 3 warm runs; durations include fetching rows.
-Baseline ms: 01_prayer.sql 17.00, 02_afterlife.sql 11.69, 03_industry.sql 14.96, 04_tv_satisfaction.sql 12.43, 05_ever_work.sql 11.48, 06_wave_changes.sql 12.33, 07_overlap.sql 24.74, 08_technology_interest.sql 22.44, 09_ballot_coverage.sql 17.12
-Before: 24.74 ms; after: 3.76 ms; equal result rows: 1.
+Baseline ms: 01_prayer.sql 16.86, 02_afterlife.sql 12.73, 03_industry.sql 16.29, 04_tv_satisfaction.sql 15.47, 05_ever_work.sql 13.01, 06_wave_changes.sql 18.84, 07_overlap.sql 29.80, 08_technology_interest.sql 24.21, 09_ballot_coverage.sql 18.36, 10_prayer_afterlife.sql 17.54, 11_media_by_age.sql 19.24
+Before: 29.80 ms; after: 5.80 ms; equal result rows: 1.
 BEFORE
 ┌─────────────────────────────────────┐
 │┌───────────────────────────────────┐│
@@ -11,7 +11,7 @@ BEFORE
 explain analyze with membership as (     select survey_year, respondent_id,            bool_or(filename='yaqeen_cut_a_2014_2016.json') as in_a,            bool_or(filename='yaqeen_cut_b_2016_2018.json') as in_b     from baseline_membership group by all ), counts as (     select count(*) filter (where in_a) as a, count(*) filter (where in_b) as b,            count(*) filter (where in_a and in_b) as shared, count(*) filter (where in_a or in_b) as distinct_n     from membership ), grain as (     select count(*) as analysis_rows, count(distinct (survey_year,respondent_id)) as distinct_interview_keys,            count(distinct respondent_id) as distinct_ids_alone from respondents ) select *, round(100.0*shared/nullif(a,0),2) as pct_a, round(100.0*shared/nullif(b,0),2) as pct_b,        analysis_rows-distinct_interview_keys as duplicate_analysis_rows,        distinct_interview_keys-distinct_ids_alone as interviews_lost_using_id_alone from counts cross join grain
 ┌────────────────────────────────────────────────┐
 │┌──────────────────────────────────────────────┐│
-││              Total Time: 0.0252s             ││
+││              Total Time: 0.0358s             ││
 │└──────────────────────────────────────────────┘│
 └────────────────────────────────────────────────┘
 ┌───────────────────────────┐
@@ -167,7 +167,7 @@ AFTER
 explain analyze with membership as (     select survey_year, respondent_id,            bool_or(filename='yaqeen_cut_a_2014_2016.json') as in_a,            bool_or(filename='yaqeen_cut_b_2016_2018.json') as in_b     from stg_membership group by all ), counts as (     select count(*) filter (where in_a) as a, count(*) filter (where in_b) as b,            count(*) filter (where in_a and in_b) as shared, count(*) filter (where in_a or in_b) as distinct_n     from membership ), grain as (     select count(*) as analysis_rows, count(distinct (survey_year,respondent_id)) as distinct_interview_keys,            count(distinct respondent_id) as distinct_ids_alone from respondents ) select *, round(100.0*shared/nullif(a,0),2) as pct_a, round(100.0*shared/nullif(b,0),2) as pct_b,        analysis_rows-distinct_interview_keys as duplicate_analysis_rows,        distinct_interview_keys-distinct_ids_alone as interviews_lost_using_id_alone from counts cross join grain
 ┌────────────────────────────────────────────────┐
 │┌──────────────────────────────────────────────┐│
-││              Total Time: 0.0047s             ││
+││              Total Time: 0.0062s             ││
 │└──────────────────────────────────────────────┘│
 └────────────────────────────────────────────────┘
 ┌───────────────────────────┐

@@ -1,4 +1,4 @@
-"""Compare all seven queries and retain actual plans for the slowest baseline."""
+"""Compare the SQL queries and retain actual plans for the slowest baseline."""
 import os
 import statistics
 import time
