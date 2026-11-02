@@ -1,5 +1,24 @@
 # Reading the survey results
 
+**Where are the answers?** Open the [five-page report](../survey-assessment.pdf). Page 3 (**Findings**, sections 01-06) summarizes the six analytical questions. Open the full results: [01 prayer by upbringing](01_prayer.csv), [02 afterlife by year, including not asked](02_afterlife.csv), [03 top industry by degree](03_industry.csv), [04 TV hours and satisfaction](04_tv_satisfaction.csv) and [rank tests](04_tv_rank_tests.csv), [05 work history among nonworkers](05_ever_work.csv), [06 changes between waves](06_wave_changes.csv). The queries have matching names in [source/sql](../../source/sql).
+
+**The eleven questions about each respondent** are columns of the `respondents` table in `build/gss.duckdb`; page 2 (**Coverage**) explains the field choices. To see actual answers instead of aggregates, run this read-only query after building the database:
+
+```sql
+select survey_year, respondent_id,
+       wrkstat as working_status, evwork as worked_at_least_one_year,
+       degree as highest_degree, educ_value as years_of_school,
+       indus10 as reported_industry, satjob as work_satisfaction,
+       postlife as afterlife_belief, pray as prayer_frequency,
+       relig16 as religion_raised_in, news as newspaper_frequency,
+       tvhours_value as tv_hours_per_day, inttech as technology_interest
+from respondents
+order by survey_year, respondent_id
+limit 10;
+```
+
+For a current industry, filter to `is_working`: nonworkers can report an earlier industry. EVWORK is not asked of current workers or job seekers, so their lifetime work duration cannot be inferred. The item asks about **at least one year**, not strictly more than 12 months. TVHOURS measures hours per day rather than viewing frequency. A null is not a “no”; the `answers` table stores the reason under `status`, keyed by survey year, respondent ID and variable. [Technology interest by wave](08_technology_interest.csv) is a separate supplement.
+
 Each row of respondents is one (survey year, respondent ID) interview. Q1-Q6 aggregate this table. Percentages are unweighted unless the column names a weight. Denominators vary by question. See the [original pre-build profile](../../docs/profile.md) and [missing counts by variable and year](../../docs/profile.csv).
 
 | File | Population and interpretation |

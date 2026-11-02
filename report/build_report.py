@@ -102,12 +102,12 @@ for i,(key,title) in enumerate([("news","Newspaper"),("tvhours","TV hours"),("ww
         part=[r for r in coverage if r["survey_year"]==w["survey_year"] and r["variable"]==key]
         pct=100*sum(int(r["valid_n"]) for r in part)/sum(int(r["interviews"]) for r in part)
         x=198+122*j; bar(x,y-7,66,pct,100);txt(x+70,y,f"{pct:.0f}%",9)
-para(42,388,"Ballot C provided no valid NEWS, TVHOURS, COMPUSE or WWWHR answers. INTTECH follows a different ballot/form pattern. Among its 3,797 valid answers, 41% were very interested and 46% moderately interested. Coverage is not a measure of interest.")
+para(42,382,"Ballot C had no valid news, TV, computer-use or web-hours answers in any wave. INTTECH had valid answers on B/X, B/Y and C/Y in 2014, then A/X, A/Y and B/X in 2016 and 2018. Letters before the slash identify the ballot and letters after it identify the form. Of 3,797 who answered, 41% were very interested and 46% moderately interested.",526,10,13)
 section(460,"Question map   /   fields and eligibility")
 mapping=[
-("Work and history","WRKSTAT defines current work (including temporary absence). EVWORK asks about at least a year, not strictly more than one; current workers and job seekers are outside its routing."),
+("Work and history","WRKSTAT includes temporary absence as working. EVWORK asks about at least one year. Current workers and job seekers skipped it, so their lifetime duration is unknown. Q5 bounds the missing answers."),
 ("Education and industry","DEGREE measures credentials; EDUC measures years. Use INDUS10 for current workers so a prior industry's label is not mistaken for a current job."),
-("Satisfaction and media","SATJOB uses the standard wording; omit the alternate 2016 item. TVHOURS is hours/day; NEWS is reading frequency. Zero TV hours is valid."),
+("Satisfaction and media","In 2016, Ballot A/Form Y used alternate work-satisfaction wording. Q4 keeps only standard SATJOB. TVHOURS measures daily duration, NEWS measures frequency, and zero hours counts."),
 ("Faith and technology","RELIG16 is upbringing, RELIG current preference, ATTEND attendance, RELITEN strength. PRAY is ordered frequency; POSTLIFE is belief. INTTECH is interest, not usage."),
 ("Web duration","WWWHR + WWWMIN / 60 measures weekly non-email web time. Require both fields. A skip is unknown. Age, sex, region, ballot, form and mode retain context.")]
 for i,(label,body) in enumerate(mapping):
@@ -124,7 +124,7 @@ def freq(group):
 mus=next(r["upbringing"] for r in pr if "mus" in r["upbringing"].lower() or "islam" in r["upbringing"].lower())
 para(42,217,f"Several-times-daily prayer: {freq('Protestant')} raised Protestant, {freq('Catholic')} raised Catholic and {freq(mus)} raised Muslim. The last group is small. CSV 01 includes the full distribution.")
 section(270,"02  Belief in life after death")
-para(42,290,"Yes among valid answers: "+", ".join(f"{r['survey_year']}: {r['yes_pct']}% ({num(r['yes_n'])}/{num(r['valid_n'])})" for r in waves)+". No year-unavailable cases; uncertain and unanswered items are excluded.")
+para(42,290,"Yes among valid answers: "+", ".join(f"{r['survey_year']}: {r['yes_pct']}% ({num(r['yes_n'])}/{num(r['valid_n'])})" for r in waves)+". Counts coded not asked that year were "+", ".join(r["not_asked_year_n"] for r in waves)+", respectively. Uncertain and unanswered items are excluded.")
 section(342,"03  Leading industry by degree")
 para(42,362,"Among current workers with both answers: "+ "; ".join(f"{r['degree'].lower()}: {r['industry'].lower()} ({r['n']}/{num(r['group_n'])})" for r in ind)+". Each is the most frequent industry, not necessarily a majority.",526,9.8,13)
 section(421,"04  TV hours and job satisfaction")
@@ -134,6 +134,7 @@ for j,r in enumerate(sat):
 with duckdb.connect(str(Path(os.environ.get("GSS_DB",BUILD/"gss.duckdb")).resolve()),read_only=True) as db:
     satisfied,valid,working=db.execute("""select count(*) filter(where satjob in ('Very satisfied','Moderately satisfied')),count(satjob),count(*) from respondents where is_working""").fetchone()
     medians=db.execute("""select median(tvhours_value) from respondents where is_working and satjob is not null and tvhours_value is not null group by satjob""").fetchall()
+    web_check=db.execute((ROOT/"report/web-sensitivity.sql").read_text(encoding="utf8")).fetchall()
 paired_yes=sum(int(r["group_n"]) for r in sat if r["satisfaction"] in ("Very satisfied","Moderately satisfied"))
 median_note="Median TV: 2 h in each group. " if set(medians)=={(2,)} else ""
 para(42,507,f"Of {num(working)} workers, {num(satisfied)}/{num(valid)} who answered were satisfied ({100*satisfied/valid:.2f}%); among TV pairs: {num(paired_yes)}/{num(rank['n'])} ({100*paired_yes/int(rank['n']):.2f}%). {median_note}Neither test detected an association: Spearman rho {float(rank['rho']):.3f}, p={float(rank['spearman_p']):.2f}; Kruskal-Wallis p={float(rank['kw_p']):.2f}. Tests ignore survey design.",526,9.7,13)
@@ -194,7 +195,9 @@ for j,r in enumerate(media):
     txt(115,y,f"{r['paired_n']} / {r['known_age_n']}",10)
     v=float(r["daily_news_pct"]);bar(253,y-7,80,v,100,amber);txt(338,y,f"{v:.1f}%",9)
     h=float(r["median_web_hours_per_week"]);bar(400,y-7,98,h,16);txt(506,y,f"{h:g}",10,"Helvetica-Bold")
-para(42,578,"*Median weekly non-email web hours. Bar scales: news 0-100%; web 0-16 hours. Both measures omit Ballot C and missing pairs. Web time measures use, not access or preference.",526,9.6,13)
+extra=sum(r[1] for r in web_check)
+web_medians=", ".join(f"{r[2]:g}" for r in web_check)
+para(42,575,f"*Median weekly non-email web hours. Axes run to 100% and 16 hours. Ballot C and missing pairs are excluded. Counting explicit nonusers with routed skips as zero adds {extra} interviews in 2018. The resulting age-group medians are {web_medians} hours. Web time alone cannot establish access or format preference.",526,9.4,12)
 decision(622,"NEXT DECISION   /   TEST A FORMAT, NOT A FAITH PROFILE","Offer a paper and video on one topic to consenting readers. Compare completion and learning separately. Historical US respondents are not Yaqeen's audience; don't infer preferences or target individuals by religion.")
 para(42,705,"If scale requires AWS: versioned S3, scheduled ECS jobs and Redshift; separate roles and track compute and scan cost. Compare Pew at survey level and keep pilot aggregates separate. See docs/production.md for assumptions.",525,9,12,muted)
 c.showPage(); c.save()
