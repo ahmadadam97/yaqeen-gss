@@ -38,6 +38,8 @@ Run `python source/benchmark.py` with the same environment after the pipeline to
 
 ## Bonuses and handoff
 
+**Five-page PDF.** Open `report/survey-assessment.pdf`; the section tabs work as page links. On Research, select WTSSPS or WTSSNRPS to change the chart in a PDF reader that supports optional-content layers. The default chart works in print. To regenerate after a successful pipeline run, use the same project environment and GSS_DB, install the optional report packages (`python -m pip install reportlab==4.4.9 pypdf==6.10.0`), then run `python report/build_report.py`. The renderer reads build/results, the matching database and the benchmark recorded in report/query-plans.txt.
+
 - [Question map, weights and panel practice](docs/analyst-guide.md): why the two research extensions follow from the brief, weighting rules and limits.
 - [Production sketch](docs/production.md): full-scale AWS storage, compute, schedule, permissions and costs; source contracts for Pew and a possible Yaqeen pilot. Design only.
 - [GitHub Actions](.github/workflows/check.yml): pushes and pull requests run Python tests and the complete pipeline, including dbt tests. A failing dbt build exits nonzero before documentation and CSV publication. Once hosted, require the `survey-checks` check in branch protection to block merging. No hosted run or protection rule is claimed.
