@@ -1,162 +1,470 @@
-Slowest baseline: 07_overlap.sql
+Slowest baseline: 14_work_status_sensitivity.sql
 Single thread, median of 3 warm runs; durations include fetching rows.
-Baseline ms: 01_prayer.sql 16.86, 02_afterlife.sql 12.73, 03_industry.sql 16.29, 04_tv_satisfaction.sql 15.47, 05_ever_work.sql 13.01, 06_wave_changes.sql 18.84, 07_overlap.sql 29.80, 08_technology_interest.sql 24.21, 09_ballot_coverage.sql 18.36, 10_prayer_afterlife.sql 17.54, 11_media_by_age.sql 19.24
-Before: 29.80 ms; after: 5.80 ms; equal result rows: 1.
+Baseline ms: 01_prayer.sql 22.97, 02_afterlife.sql 19.38, 03_industry.sql 19.74, 04_tv_satisfaction.sql 18.41, 05_ever_work.sql 18.56, 06_wave_changes.sql 24.11, 07_overlap.sql 31.93, 08_technology_interest.sql 35.63, 09_ballot_coverage.sql 25.15, 10_prayer_afterlife.sql 25.63, 11_media_by_age.sql 25.94, 12_report_summary.sql 30.74, 13_web_sensitivity.sql 22.01, 14_work_status_sensitivity.sql 139.39
+Before: 139.39 ms; after: 29.39 ms; equal result rows: 24.
 BEFORE
 ┌─────────────────────────────────────┐
 │┌───────────────────────────────────┐│
 ││    Query Profiling Information    ││
 │└───────────────────────────────────┘│
 └─────────────────────────────────────┘
-explain analyze with membership as (     select survey_year, respondent_id,            bool_or(filename='yaqeen_cut_a_2014_2016.json') as in_a,            bool_or(filename='yaqeen_cut_b_2016_2018.json') as in_b     from baseline_membership group by all ), counts as (     select count(*) filter (where in_a) as a, count(*) filter (where in_b) as b,            count(*) filter (where in_a and in_b) as shared, count(*) filter (where in_a or in_b) as distinct_n     from membership ), grain as (     select count(*) as analysis_rows, count(distinct (survey_year,respondent_id)) as distinct_interview_keys,            count(distinct respondent_id) as distinct_ids_alone from respondents ) select *, round(100.0*shared/nullif(a,0),2) as pct_a, round(100.0*shared/nullif(b,0),2) as pct_b,        analysis_rows-distinct_interview_keys as duplicate_analysis_rows,        distinct_interview_keys-distinct_ids_alone as interviews_lost_using_id_alone from counts cross join grain
+explain analyze -- Reclassify temporarily absent workers only as a sensitivity alternative. with classified as (     select r.*, d.definition,            case when d.definition='Standard: codes 1-3' then wrkstat_value between 1 and 3                 else wrkstat_value between 1 and 2 end as working     from baseline_interviews r cross join (values ('Standard: codes 1-3'), ('Alternative: codes 1-2')) d(definition) ), industry as (     select definition, degree as subgroup, indus10 as detail, count(*) as n,            sum(count(*)) over (partition by definition,degree) as denominator,            dense_rank() over (partition by definition,degree order by count(*) desc) as position     from classified where working and degree is not null and indus10 is not null group by definition,degree,indus10 ), tv as (     select definition, satjob as subgroup, count(*) as n, avg(tvhours_value) as value     from classified where working and satjob is not null and tvhours_value is not null group by all ), history as (     select definition, count(*) as n, count(evwork) as denominator,            count(*) filter (where evwork='YES') as yes_n,            count(*)-count(evwork) as missing_n from classified where working=false group by definition ) select 'Q3' as question, definition, subgroup, detail, n, denominator,        round(100.0*n/denominator,2) as value from industry where position=1 union all select 'Q4', definition, subgroup, 'mean TV hours/day', n, n, round(value,2) from tv union all select 'Q5', definition, 'Observed yes', 'nonworkers / valid answers', n, denominator,        round(100.0*yes_n/nullif(denominator,0),2) from history union all select 'Q5', definition, 'Lower bound', 'all missing assigned no', n, denominator,        round(100.0*yes_n/nullif(n,0),2) from history union all select 'Q5', definition, 'Upper bound', 'all missing assigned yes', n, denominator,        round(100.0*(yes_n+missing_n)/nullif(n,0),2) from history order by question,definition,subgroup,detail
 ┌────────────────────────────────────────────────┐
 │┌──────────────────────────────────────────────┐│
-││              Total Time: 0.0358s             ││
+││              Total Time: 0.165s              ││
 │└──────────────────────────────────────────────┘│
 └────────────────────────────────────────────────┘
-┌───────────────────────────┐
-│           QUERY           │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│      EXPLAIN_ANALYZE      │
-│    ────────────────────   │
-│           0 rows          │
-│          (0.00s)          │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│         PROJECTION        │
-│    ────────────────────   │
-│             a             │
-│             b             │
-│           shared          │
-│         distinct_n        │
-│       analysis_rows       │
-│  distinct_interview_keys  │
-│     distinct_ids_alone    │
-│           pct_a           │
-│           pct_b           │
-│  duplicate_analysis_rows  │
-│interviews_lost_using_id_al│
-│            one            │
-│                           │
-│           1 row           │
-│          (0.00s)          │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│         PROJECTION        │
-│    ────────────────────   │
-│             a             │
-│             b             │
-│           shared          │
-│         distinct_n        │
-│       analysis_rows       │
-│  distinct_interview_keys  │
-│     distinct_ids_alone    │
-│ CAST((100.0 * CAST(shared │
-│    AS DECIMAL(23,0))) AS  │
-│           DOUBLE)         │
-│                           │
-│           1 row           │
-│          (0.00s)          │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│       CROSS_PRODUCT       │
-│    ────────────────────   │
-│           1 row           ├──────────────┐
-│          (0.00s)          │              │
-└─────────────┬─────────────┘              │
-┌─────────────┴─────────────┐┌─────────────┴─────────────┐
-│    UNGROUPED_AGGREGATE    ││    UNGROUPED_AGGREGATE    │
-│    ────────────────────   ││    ────────────────────   │
-│        Aggregates:        ││        Aggregates:        │
-│ count_star() FILTER (WHERE││        count_star()       │
-│       #0) Filter: #0      ││     count(DISTINCT #0)    │
-│ count_star() FILTER (WHERE││     count(DISTINCT #1)    │
-│       #1) Filter: #1      ││                           │
-│ count_star() FILTER (WHERE││                           │
-│       #2) Filter: #2      ││                           │
-│ count_star() FILTER (WHERE││                           │
-│       #3) Filter: #3      ││                           │
-│                           ││                           │
-│           1 row           ││           1 row           │
-│          (0.00s)          ││          (0.00s)          │
-└─────────────┬─────────────┘└─────────────┬─────────────┘
-┌─────────────┴─────────────┐┌─────────────┴─────────────┐
-│         PROJECTION        ││         PROJECTION        │
-│    ────────────────────   ││    ────────────────────   │
-│            in_a           ││     "row"(survey_year,    │
-│            in_b           ││       respondent_id)      │
-│      (in_a AND in_b)      ││       respondent_id       │
-│       (in_a OR in_b)      ││                           │
-│                           ││                           │
-│         7,753 rows        ││         7,753 rows        │
-│          (0.00s)          ││          (0.00s)          │
-└─────────────┬─────────────┘└─────────────┬─────────────┘
-┌─────────────┴─────────────┐┌─────────────┴─────────────┐
-│         PROJECTION        ││         TABLE_SCAN        │
-│    ────────────────────   ││    ────────────────────   │
-│            in_a           ││     Table: respondents    │
-│            in_b           ││   Type: Sequential Scan   │
-│                           ││                           │
-│                           ││        Projections:       │
-│                           ││        survey_year        │
-│                           ││       respondent_id       │
-│                           ││                           │
-│         7,753 rows        ││         7,753 rows        │
-│          (0.00s)          ││          (0.00s)          │
-└─────────────┬─────────────┘└───────────────────────────┘
-┌─────────────┴─────────────┐
-│       HASH_GROUP_BY       │
-│    ────────────────────   │
-│          Groups:          │
-│             #0            │
-│             #1            │
-│                           │
-│        Aggregates:        │
-│        bool_or(#2)        │
-│        bool_or(#3)        │
-│                           │
-│         7,753 rows        │
-│          (0.00s)          │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│         PROJECTION        │
-│    ────────────────────   │
-│        survey_year        │
-│       respondent_id       │
-│        (filename =        │
-│  'yaqeen_cut_a_2014_2016  │
-│          .json')          │
-│        (filename =        │
-│  'yaqeen_cut_b_2016_2018  │
-│          .json')          │
-│                           │
-│        10,620 rows        │
-│          (0.00s)          │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│         PROJECTION        │
-│    ────────────────────   │
-│          filename         │
-│        survey_year        │
-│       respondent_id       │
-│                           │
-│        10,620 rows        │
-│          (0.02s)          │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│         TABLE_SCAN        │
-│    ────────────────────   │
-│       Table: records      │
-│   Type: Sequential Scan   │
-│                           │
-│        Projections:       │
-│          filename         │
-│          payload          │
-│                           │
-│        10,620 rows        │
-│          (0.00s)          │
-└───────────────────────────┘
+┌───────────────────────┐
+│         QUERY         │
+└───────────┬───────────┘
+┌───────────┴───────────┐
+│    EXPLAIN_ANALYZE    │
+│    ────────────────   │
+│         0 rows        │
+│        (0.00s)        │
+└───────────┬───────────┘
+┌───────────┴───────────┐
+│          CTE          │
+│    ────────────────   │
+│       CTE Name:       │
+│       classified      │
+│                       ├──────────────────────────────────────────────────────────────┐
+│     Table Index: 0    │                                                              │
+│                       │                                                              │
+│         0 rows        │                                                              │
+│        (0.01s)        │                                                              │
+└───────────┬───────────┘                                                              │
+┌───────────┴───────────┐                                                  ┌───────────┴───────────┐
+│       PROJECTION      │                                                  │          CTE          │
+│    ────────────────   │                                                  │    ────────────────   │
+│      survey_year      │                                                  │   CTE Name: history   │
+│     respondent_id     │                                                  │    Table Index: 46    │
+│       age_value       │                                                  │                       │
+│         attend        │                                                  │                       │
+│         ballot        │                                                  │                       │
+│         degree        │                                                  │                       │
+│       educ_value      │                                                  │                       │
+│         evwork        │                                                  │                       │
+│          form         │                                                  │                       │
+│        indus10        │                                                  │                       │
+│        inttech        │                                                  │                       │
+│          mode         │                                                  │                       │
+│          news         │                                                  │                       │
+│        postlife       │                                                  │                       │
+│    postlife_status    │                                                  │                       │
+│          ...          │                                                  │                       │
+│         satjob        │                                                  │                       ├────────────┐
+│          sex          │                                                  │                       │            │
+│     tvhours_value     │                                                  │                       │            │
+│        wrkstat        │                                                  │                       │            │
+│     wrkstat_value     │                                                  │                       │            │
+│     wtssnrps_value    │                                                  │                       │            │
+│      wtssps_value     │                                                  │                       │            │
+│      wwwhr_value      │                                                  │                       │            │
+│      wwwmin_value     │                                                  │                       │            │
+│    catalogued_items   │                                                  │                       │            │
+│       is_working      │                                                  │                       │            │
+│   ever_work_eligible  │                                                  │                       │            │
+│    web_hours_weekly   │                                                  │                       │            │
+│       definition      │                                                  │                       │            │
+│        working        │                                                  │                       │            │
+│                       │                                                  │                       │            │
+│      15,456 rows      │                                                  │         0 rows        │            │
+│        (0.00s)        │                                                  │        (0.00s)        │            │
+└───────────┬───────────┘                                                  └───────────┬───────────┘            │
+┌───────────┴───────────┐                                                  ┌───────────┴───────────┐┌───────────┴───────────┐
+│   BLOCKWISE_NL_JOIN   │                                                  │       PROJECTION      ││       PROJECTION      │
+│    ────────────────   │                                                  │    ────────────────   ││    ────────────────   │
+│    Join Type: INNER   │                                                  │       definition      ││__internal_decompress_s│
+│                       │                                                  │           n           ││       tring(#0)       │
+│       Condition:      │                                                  │      denominator      ││           #1          │
+│  (((tvhours_value IS  │                                                  │         yes_n         ││           #2          │
+│     NOT NULL) AND (   │                                                  │       missing_n       ││           #3          │
+│  (satjob IS NOT NULL) │                                                  │                       ││           #4          │
+│    AND CASE  WHEN (   │                                                  │                       ││           #5          │
+│     (definition =     │                                                  │                       ││           #6          │
+│ 'Standard: codes 1-3')│                                                  │                       ││                       │
+│       ) THEN ((       │                                                  │                       ││                       │
+│ (wrkstat_value >= 1.0)│                                                  │                       ││                       │
+│  AND (wrkstat_value <=│                                                  │                       ││                       │
+│      3.0))) ELSE (    │                                                  │                       ││                       │
+│ (wrkstat_value >= 1.0)│                                                  │                       ││                       │
+│  AND (wrkstat_value <=│                                                  │                       ││                       │
+│  2.0)) END)) OR ((CASE│                                                  │                       ││                       │
+│   WHEN ((definition = │                                                  │                       ││                       │
+│ 'Standard: codes 1-3')│                                                  │                       ││                       │
+│       ) THEN ((       │                                                  │                       ││                       │
+│ (wrkstat_value >= 1.0)├─────────────────────────────────────┐            │                       ││                       │
+│  AND (wrkstat_value <=│                                     │            │                       ││                       │
+│      3.0))) ELSE (    │                                     │            │                       ││                       │
+│ (wrkstat_value >= 1.0)│                                     │            │                       ││                       │
+│  AND (wrkstat_value <=│                                     │            │                       ││                       │
+│  2.0)) END = false) OR│                                     │            │                       ││                       │
+│  ((indus10 IS NOT NULL│                                     │            │                       ││                       │
+│ ) AND ((degree IS NOT │                                     │            │                       ││                       │
+│  NULL) AND CASE  WHEN │                                     │            │                       ││                       │
+│    ((definition =     │                                     │            │                       ││                       │
+│ 'Standard: codes 1-3')│                                     │            │                       ││                       │
+│       ) THEN ((       │                                     │            │                       ││                       │
+│ (wrkstat_value >= 1.0)│                                     │            │                       ││                       │
+│  AND (wrkstat_value <=│                                     │            │                       ││                       │
+│      3.0))) ELSE (    │                                     │            │                       ││                       │
+│ (wrkstat_value >= 1.0)│                                     │            │                       ││                       │
+│  AND (wrkstat_value <=│                                     │            │                       ││                       │
+│      2.0)) END))))    │                                     │            │                       ││                       │
+│                       │                                     │            │                       ││                       │
+│      15,456 rows      │                                     │            │         2 rows        ││        24 rows        │
+│        (0.00s)        │                                     │            │        (0.00s)        ││        (0.00s)        │
+└───────────┬───────────┘                                     │            └───────────┬───────────┘└───────────┬───────────┘
+┌───────────┴───────────┐                         ┌───────────┴───────────┐┌───────────┴───────────┐┌───────────┴───────────┐
+│       PROJECTION      │                         │    COLUMN_DATA_SCAN   ││     HASH_GROUP_BY     ││        ORDER_BY       │
+│    ────────────────   │                         │                       ││    ────────────────   ││    ────────────────   │
+│      survey_year      │                         │                       ││       Groups: #0      ││      question ASC     │
+│     respondent_id     │                         │                       ││                       ││     definition ASC    │
+│       age_value       │                         │                       ││      Aggregates:      ││      subgroup ASC     │
+│         attend        │                         │                       ││      count_star()     ││       detail ASC      │
+│         ballot        │                         │                       ││       count(#1)       ││                       │
+│         degree        │                         │                       ││  count_star() FILTER  ││                       │
+│       educ_value      │                         │                       ││ (WHERE #1) Filter: #1 ││                       │
+│         evwork        │                         │                       ││                       ││                       │
+│          form         │                         │                       ││                       ││                       │
+│        indus10        │                         │                       ││                       ││                       │
+│        inttech        │                         │                       ││                       ││                       │
+│          mode         │                         │                       ││                       ││                       │
+│          news         │                         │                       ││                       ││                       │
+│        postlife       │                         │                       ││                       ││                       │
+│    postlife_status    │                         │                       ││                       ││                       │
+│          ...          │                         │                       ││                       ││                       │
+│        relig16        │                         │                       ││                       ││                       │
+│        reliten        │                         │                       ││                       ││                       │
+│         satjob        │                         │                       ││                       ││                       │
+│          sex          │                         │                       ││                       ││                       │
+│     tvhours_value     │                         │                       ││                       ││                       │
+│        wrkstat        │                         │                       ││                       ││                       │
+│     wrkstat_value     │                         │                       ││                       ││                       │
+│     wtssnrps_value    │                         │                       ││                       ││                       │
+│      wtssps_value     │                         │                       ││                       ││                       │
+│      wwwhr_value      │                         │                       ││                       ││                       │
+│      wwwmin_value     │                         │                       ││                       ││                       │
+│    catalogued_items   │                         │                       ││                       ││                       │
+│       is_working      │                         │                       ││                       ││                       │
+│   ever_work_eligible  │                         │                       ││                       ││                       │
+│    web_hours_weekly   │                         │                       ││                       ││                       │
+│                       │                         │                       ││                       ││                       │
+│       7,753 rows      │                         │         2 rows        ││         2 rows        ││        24 rows        │
+│        (0.00s)        │                         │        (0.00s)        ││        (0.00s)        ││        (0.00s)        │
+└───────────┬───────────┘                         └───────────────────────┘└───────────┬───────────┘└───────────┬───────────┘
+┌───────────┴───────────┐                                                  ┌───────────┴───────────┐┌───────────┴───────────┐
+│       HASH_JOIN       │                                                  │       PROJECTION      ││       PROJECTION      │
+│    ────────────────   │                                                  │    ────────────────   ││    ────────────────   │
+│    Join Type: LEFT    │                                                  │       definition      ││__internal_compress_str│
+│                       │                                                  │         evwork        ││    ing_uinteger(#0)   │
+│      Conditions:      │                                                  │    (evwork = 'YES')   ││           #1          │
+│  wrkstat_value = CAST │                                                  │                       ││           #2          │
+│(source_code AS DOUBLE)├────────────┐                                     │                       ││           #3          │
+│                       │            │                                     │                       ││           #4          │
+│                       │            │                                     │                       ││           #5          │
+│                       │            │                                     │                       ││           #6          │
+│                       │            │                                     │                       ││                       │
+│       7,753 rows      │            │                                     │       6,218 rows      ││        24 rows        │
+│        (0.00s)        │            │                                     │        (0.00s)        ││        (0.00s)        │
+└───────────┬───────────┘            │                                     └───────────┬───────────┘└───────────┬───────────┘
+┌───────────┴───────────┐┌───────────┴───────────┐                         ┌───────────┴───────────┐┌───────────┴───────────┐
+│       PROJECTION      ││       TABLE_SCAN      │                         │       PROJECTION      ││         UNION         │
+│    ────────────────   ││    ────────────────   │                         │    ────────────────   ││    ────────────────   │
+│__internal_decompress_i││         Table:        │                         │           #7          ││                       │
+│  ntegral_integer(#0,  ││      work_status      │                         │          #34          ││                       │
+│          2014)        ││                       │                         │                       ││                       │
+│__internal_decompress_i││         Type:         │                         │                       ││                       │
+│ ntegral_integer(#1, 1)││    Sequential Scan    │                         │                       ││                       │
+│           #2          ││                       │                         │                       ││                       │
+│           #3          ││      Projections:     │                         │                       ││                       │
+│           #4          ││      source_code      │                         │                       ││                       │
+│           #5          ││       is_working      │                         │                       ││                       │
+│           #6          ││   ever_work_eligible  │                         │                       ││                       │
+│           #7          ││                       │                         │                       ││                       │
+│           #8          ││                       │                         │                       ││                       │
+│           #9          ││                       │                         │                       ││                       │
+│          #10          ││                       │                         │                       ││                       │
+│          #11          ││                       │                         │                       ││                       │
+│          #12          ││                       │                         │                       ││                       │
+│          #13          ││                       │                         │                       ││                       │
+│          #14          ││                       │                         │                       ││                       ├───────────────────────────────────────────────────────────────────────────────────────┐
+│          ...          ││                       │                         │                       ││                       │                                                                                       │
+│          #16          ││                       │                         │                       ││                       │                                                                                       │
+│          #17          ││                       │                         │                       ││                       │                                                                                       │
+│          #18          ││                       │                         │                       ││                       │                                                                                       │
+│          #19          ││                       │                         │                       ││                       │                                                                                       │
+│          #20          ││                       │                         │                       ││                       │                                                                                       │
+│          #21          ││                       │                         │                       ││                       │                                                                                       │
+│          #22          ││                       │                         │                       ││                       │                                                                                       │
+│          #23          ││                       │                         │                       ││                       │                                                                                       │
+│          #24          ││                       │                         │                       ││                       │                                                                                       │
+│          #25          ││                       │                         │                       ││                       │                                                                                       │
+│          #26          ││                       │                         │                       ││                       │                                                                                       │
+│          #27          ││                       │                         │                       ││                       │                                                                                       │
+│          #28          ││                       │                         │                       ││                       │                                                                                       │
+│          #29          ││                       │                         │                       ││                       │                                                                                       │
+│          #30          ││                       │                         │                       ││                       │                                                                                       │
+│                       ││                       │                         │                       ││                       │                                                                                       │
+│       7,753 rows      ││         8 rows        │                         │       6,218 rows      ││         0 rows        │                                                                                       │
+│        (0.00s)        ││        (0.00s)        │                         │        (0.00s)        ││        (0.00s)        │                                                                                       │
+└───────────┬───────────┘└───────────────────────┘                         └───────────┬───────────┘└───────────┬───────────┘                                                                                       │
+┌───────────┴───────────┐                                                  ┌───────────┴───────────┐┌───────────┴───────────┐                                                                           ┌───────────┴───────────┐
+│     HASH_GROUP_BY     │                                                  │         FILTER        ││         UNION         │                                                                           │       PROJECTION      │
+│    ────────────────   │                                                  │    ────────────────   ││    ────────────────   │                                                                           │    ────────────────   │
+│        Groups:        │                                                  │   (working = false)   ││                       │                                                                           │          'Q5'         │
+│           #0          │                                                  │                       ││                       │                                                                           │       definition      │
+│           #1          │                                                  │                       ││                       │                                                                           │     'Upper bound'     │
+│                       │                                                  │                       ││                       │                                                                           │ 'all missing assigned │
+│      Aggregates:      │                                                  │                       ││                       │                                                                           │          yes'         │
+│ max(#2) FILTER (WHERE │                                                  │                       ││                       │                                                                           │           n           │
+│    #28) Filter: #28   │                                                  │                       ││                       │                                                                           │      denominator      │
+│ max(#4) FILTER (WHERE │                                                  │                       ││                       │                                                                           │  round((CAST((100.0 * │
+│    #29) Filter: #29   │                                                  │                       ││                       │                                                                           │      CAST((yes_n +    │
+│ max(#6) FILTER (WHERE │                                                  │                       ││                       │                                                                           │  missing_n) AS DECIMAL│
+│    #30) Filter: #30   │                                                  │                       ││                       │                                                                           │ (23,0))) AS DOUBLE) / │
+│ max(#8) FILTER (WHERE │                                                  │                       ││                       │                                                                           │  CAST(CASE  WHEN ((n =│
+│    #31) Filter: #31   │                                                  │                       ││                       │                                                                           │  0)) THEN (NULL) ELSE │
+│ max(#10) FILTER (WHERE│                                                  │                       ││                       │                                                                           │  n END AS DOUBLE)), 2)│
+│    #32) Filter: #32   │                                                  │                       ││                       │                                                                           │                       │
+│ max(#12) FILTER (WHERE│                                                  │                       ││                       │                                                                           │                       │
+│    #33) Filter: #33   │                                                  │                       ││                       │                                                                           │                       │
+│ max(#14) FILTER (WHERE│                                                  │                       ││                       │                                                                           │                       │
+│    #34) Filter: #34   │                                                  │                       ││                       │                                                                           │                       │
+│ max(#16) FILTER (WHERE│                                                  │                       ││                       │                                                                           │                       │
+│    #35) Filter: #35   │                                                  │                       ││                       │                                                                           │                       │
+│ max(#18) FILTER (WHERE│                                                  │                       ││                       │                                                                           │                       │
+│    #36) Filter: #36   │                                                  │                       ││                       │                                                                           │                       │
+│ max(#20) FILTER (WHERE│                                                  │                       ││                       │                                                                           │                       │
+│    #37) Filter: #37   │                                                  │                       ││                       │                                                                           │                       │
+│ max(#22) FILTER (WHERE│                                                  │                       ││                       │                                                                           │                       │
+│    #38) Filter: #38   │                                                  │                       ││                       │                                                                           │                       │
+│ max(#24) FILTER (WHERE│                                                  │                       ││                       │                                                                           │                       │
+│    #39) Filter: #39   │                                                  │                       ││                       │                                                                           │                       │
+│ max(#26) FILTER (WHERE│                                                  │                       ││                       │                                                                           │                       │
+│    #40) Filter: #40   │                                                  │                       ││                       │                                                                           │                       │
+│ max(#28) FILTER (WHERE│                                                  │                       ││                       ├──────────────────────────────────────────────────────────────┐            │                       │
+│    #41) Filter: #41   │                                                  │                       ││                       │                                                              │            │                       │
+│ max(#30) FILTER (WHERE│                                                  │                       ││                       │                                                              │            │                       │
+│    #42) Filter: #42   │                                                  │                       ││                       │                                                              │            │                       │
+│ max(#32) FILTER (WHERE│                                                  │                       ││                       │                                                              │            │                       │
+│    #43) Filter: #43   │                                                  │                       ││                       │                                                              │            │                       │
+│ max(#34) FILTER (WHERE│                                                  │                       ││                       │                                                              │            │                       │
+│    #44) Filter: #44   │                                                  │                       ││                       │                                                              │            │                       │
+│ max(#36) FILTER (WHERE│                                                  │                       ││                       │                                                              │            │                       │
+│    #45) Filter: #45   │                                                  │                       ││                       │                                                              │            │                       │
+│ max(#38) FILTER (WHERE│                                                  │                       ││                       │                                                              │            │                       │
+│    #46) Filter: #46   │                                                  │                       ││                       │                                                              │            │                       │
+│ max(#40) FILTER (WHERE│                                                  │                       ││                       │                                                              │            │                       │
+│    #47) Filter: #47   │                                                  │                       ││                       │                                                              │            │                       │
+│ max(#42) FILTER (WHERE│                                                  │                       ││                       │                                                              │            │                       │
+│    #48) Filter: #48   │                                                  │                       ││                       │                                                              │            │                       │
+│ max(#44) FILTER (WHERE│                                                  │                       ││                       │                                                              │            │                       │
+│    #49) Filter: #49   │                                                  │                       ││                       │                                                              │            │                       │
+│ max(#46) FILTER (WHERE│                                                  │                       ││                       │                                                              │            │                       │
+│    #50) Filter: #50   │                                                  │                       ││                       │                                                              │            │                       │
+│ max(#48) FILTER (WHERE│                                                  │                       ││                       │                                                              │            │                       │
+│    #51) Filter: #51   │                                                  │                       ││                       │                                                              │            │                       │
+│ max(#50) FILTER (WHERE│                                                  │                       ││                       │                                                              │            │                       │
+│    #52) Filter: #52   │                                                  │                       ││                       │                                                              │            │                       │
+│ max(#52) FILTER (WHERE│                                                  │                       ││                       │                                                              │            │                       │
+│    #53) Filter: #53   │                                                  │                       ││                       │                                                              │            │                       │
+│ max(#54) FILTER (WHERE│                                                  │                       ││                       │                                                              │            │                       │
+│    #54) Filter: #54   │                                                  │                       ││                       │                                                              │            │                       │
+│ max(#56) FILTER (WHERE│                                                  │                       ││                       │                                                              │            │                       │
+│    #55) Filter: #55   │                                                  │                       ││                       │                                                              │            │                       │
+│      count_star()     │                                                  │                       ││                       │                                                              │            │                       │
+│                       │                                                  │                       ││                       │                                                              │            │                       │
+│       7,753 rows      │                                                  │       6,218 rows      ││         0 rows        │                                                              │            │         2 rows        │
+│        (0.08s)        │                                                  │        (0.00s)        ││        (0.00s)        │                                                              │            │        (0.00s)        │
+└───────────┬───────────┘                                                  └───────────┬───────────┘└───────────┬───────────┘                                                              │            └───────────┬───────────┘
+┌───────────┴───────────┐                                                  ┌───────────┴───────────┐┌───────────┴───────────┐                                                  ┌───────────┴───────────┐┌───────────┴───────────┐
+│       PROJECTION      │                                                  │        CTE_SCAN       ││         UNION         │                                                  │       PROJECTION      ││        CTE_SCAN       │
+│    ────────────────   │                                                  │    ────────────────   ││    ────────────────   │                                                  │    ────────────────   ││    ────────────────   │
+│      survey_year      │                                                  │      CTE Index: 0     ││                       │                                                  │          'Q5'         ││     CTE Index: 46     │
+│     respondent_id     │                                                  │                       ││                       │                                                  │       definition      ││                       │
+│      answer_value     │                                                  │                       ││                       │                                                  │     'Lower bound'     ││                       │
+│   (variable = 'age')  │                                                  │                       ││                       │                                                  │ 'all missing assigned ││                       │
+│      answer_label     │                                                  │                       ││                       │                                                  │           no'         ││                       │
+│ (variable = 'attend') │                                                  │                       ││                       │                                                  │           n           ││                       │
+│      answer_label     │                                                  │                       ││                       │                                                  │      denominator      ││                       │
+│ (variable = 'ballot') │                                                  │                       ││                       │                                                  │  round((CAST((100.0 * ││                       │
+│      answer_label     │                                                  │                       ││                       │                                                  │  CAST(yes_n AS DECIMAL││                       │
+│ (variable = 'degree') │                                                  │                       ││                       │                                                  │ (23,0))) AS DOUBLE) / ││                       │
+│      answer_value     │                                                  │                       ││                       │                                                  │  CAST(CASE  WHEN ((n =││                       │
+│  (variable = 'educ')  │                                                  │                       ││                       │                                                  │  0)) THEN (NULL) ELSE ││                       │
+│      answer_label     │                                                  │                       ││                       │                                                  │  n END AS DOUBLE)), 2)││                       │
+│ (variable = 'evwork') │                                                  │                       ││                       │                                                  │                       ││                       │
+│      answer_label     │                                                  │                       ││                       │                                                  │                       ││                       │
+│          ...          │                                                  │                       ││                       │                                                  │                       ││                       │
+│   (variable = 'sex')  │                                                  │                       ││                       ├─────────────────────────────────────┐            │                       ││                       │
+│      answer_value     │                                                  │                       ││                       │                                     │            │                       ││                       │
+│ (variable = 'tvhours')│                                                  │                       ││                       │                                     │            │                       ││                       │
+│      answer_label     │                                                  │                       ││                       │                                     │            │                       ││                       │
+│           #8          │                                                  │                       ││                       │                                     │            │                       ││                       │
+│      answer_value     │                                                  │                       ││                       │                                     │            │                       ││                       │
+│           #8          │                                                  │                       ││                       │                                     │            │                       ││                       │
+│      answer_value     │                                                  │                       ││                       │                                     │            │                       ││                       │
+│(variable = 'wtssnrps')│                                                  │                       ││                       │                                     │            │                       ││                       │
+│      answer_value     │                                                  │                       ││                       │                                     │            │                       ││                       │
+│ (variable = 'wtssps') │                                                  │                       ││                       │                                     │            │                       ││                       │
+│      answer_value     │                                                  │                       ││                       │                                     │            │                       ││                       │
+│  (variable = 'wwwhr') │                                                  │                       ││                       │                                     │            │                       ││                       │
+│      answer_value     │                                                  │                       ││                       │                                     │            │                       ││                       │
+│ (variable = 'wwwmin') │                                                  │                       ││                       │                                     │            │                       ││                       │
+│                       │                                                  │                       ││                       │                                     │            │                       ││                       │
+│      232,590 rows     │                                                  │      15,456 rows      ││         0 rows        │                                     │            │         2 rows        ││         2 rows        │
+│        (0.01s)        │                                                  │        (0.00s)        ││        (0.00s)        │                                     │            │        (0.00s)        ││        (0.00s)        │
+└───────────┬───────────┘                                                  └───────────────────────┘└───────────┬───────────┘                                     │            └───────────┬───────────┘└───────────────────────┘
+┌───────────┴───────────┐                                                                           ┌───────────┴───────────┐                         ┌───────────┴───────────┐┌───────────┴───────────┐
+│       PROJECTION      │                                                                           │         UNION         │                         │       PROJECTION      ││        CTE_SCAN       │
+│    ────────────────   │                                                                           │    ────────────────   │                         │    ────────────────   ││    ────────────────   │
+│__internal_compress_int│                                                                           │                       │                         │          'Q5'         ││     CTE Index: 46     │
+│   egral_utinyint(#0,  │                                                                           │                       │                         │       definition      ││                       │
+│          2014)        │                                                                           │                       │                         │     'Observed yes'    ││                       │
+│__internal_compress_int│                                                                           │                       │                         │  'nonworkers / valid  ││                       │
+│ egral_usmallint(#1, 1)│                                                                           │                       │                         │        answers'       ││                       │
+│           #2          │                                                                           │                       │                         │           n           ││                       │
+│           #3          │                                                                           │                       │                         │      denominator      ││                       │
+│           #4          │                                                                           │                       │                         │  round((CAST((100.0 * ││                       │
+│           #5          │                                                                           │                       ├────────────┐            │  CAST(yes_n AS DECIMAL││                       │
+│           #6          │                                                                           │                       │            │            │ (23,0))) AS DOUBLE) / ││                       │
+│           #7          │                                                                           │                       │            │            │    CAST(CASE  WHEN (  ││                       │
+│           #8          │                                                                           │                       │            │            │   (denominator = 0))  ││                       │
+│                       │                                                                           │                       │            │            │    THEN (NULL) ELSE   ││                       │
+│                       │                                                                           │                       │            │            │   denominator END AS  ││                       │
+│                       │                                                                           │                       │            │            │      DOUBLE)), 2)     ││                       │
+│                       │                                                                           │                       │            │            │                       ││                       │
+│      232,590 rows     │                                                                           │         0 rows        │            │            │         2 rows        ││         2 rows        │
+│        (0.00s)        │                                                                           │        (0.00s)        │            │            │        (0.00s)        ││        (0.00s)        │
+└───────────┬───────────┘                                                                           └───────────┬───────────┘            │            └───────────┬───────────┘└───────────────────────┘
+┌───────────┴───────────┐                                                                           ┌───────────┴───────────┐┌───────────┴───────────┐┌───────────┴───────────┐
+│       PROJECTION      │                                                                           │       PROJECTION      ││       PROJECTION      ││        CTE_SCAN       │
+│    ────────────────   │                                                                           │    ────────────────   ││    ────────────────   ││    ────────────────   │
+│      survey_year      │                                                                           │        question       ││          'Q4'         ││     CTE Index: 46     │
+│     respondent_id     │                                                                           │       definition      ││       definition      ││                       │
+│      answer_value     │                                                                           │        subgroup       ││        subgroup       ││                       │
+│        variable       │                                                                           │         detail        ││  'mean TV hours/day'  ││                       │
+│      answer_label     │                                                                           │           n           ││           n           ││                       │
+│(variable = 'postlife')│                                                                           │      denominator      ││           n           ││                       │
+│         status        │                                                                           │         value         ││    round(value, 2)    ││                       │
+│  (variable = 'pray')  │                                                                           │                       ││                       ││                       │
+│ (variable = 'wrkstat')│                                                                           │                       ││                       ││                       │
+│                       │                                                                           │                       ││                       ││                       │
+│      232,590 rows     │                                                                           │        10 rows        ││         8 rows        ││         2 rows        │
+│        (0.00s)        │                                                                           │        (0.00s)        ││        (0.00s)        ││        (0.00s)        │
+└───────────┬───────────┘                                                                           └───────────┬───────────┘└───────────┬───────────┘└───────────────────────┘
+┌───────────┴───────────┐                                                                           ┌───────────┴───────────┐┌───────────┴───────────┐
+│       TABLE_SCAN      │                                                                           │       PROJECTION      ││     HASH_GROUP_BY     │
+│    ────────────────   │                                                                           │    ────────────────   ││    ────────────────   │
+│     Table: answers    │                                                                           │           #0          ││        Groups:        │
+│                       │                                                                           │           #1          ││           #0          │
+│         Type:         │                                                                           │           #2          ││           #1          │
+│    Sequential Scan    │                                                                           │           #3          ││                       │
+│                       │                                                                           │           #4          ││      Aggregates:      │
+│      Projections:     │                                                                           │                       ││      count_star()     │
+│      survey_year      │                                                                           │                       ││        avg(#2)        │
+│     respondent_id     │                                                                           │                       ││                       │
+│        variable       │                                                                           │                       ││                       │
+│      answer_value     │                                                                           │                       ││                       │
+│      answer_label     │                                                                           │                       ││                       │
+│         status        │                                                                           │                       ││                       │
+│                       │                                                                           │                       ││                       │
+│      232,590 rows     │                                                                           │        10 rows        ││         8 rows        │
+│        (0.01s)        │                                                                           │        (0.00s)        ││        (0.00s)        │
+└───────────────────────┘                                                                           └───────────┬───────────┘└───────────┬───────────┘
+                                                                                                    ┌───────────┴───────────┐┌───────────┴───────────┐
+                                                                                                    │         FILTER        ││       PROJECTION      │
+                                                                                                    │    ────────────────   ││    ────────────────   │
+                                                                                                    │     (position = 1)    ││       definition      │
+                                                                                                    │                       ││        subgroup       │
+                                                                                                    │                       ││     tvhours_value     │
+                                                                                                    │                       ││                       │
+                                                                                                    │        10 rows        ││       5,601 rows      │
+                                                                                                    │        (0.00s)        ││        (0.00s)        │
+                                                                                                    └───────────┬───────────┘└───────────┬───────────┘
+                                                                                                    ┌───────────┴───────────┐┌───────────┴───────────┐
+                                                                                                    │       PROJECTION      ││       PROJECTION      │
+                                                                                                    │    ────────────────   ││    ────────────────   │
+                                                                                                    │           #0          ││          #21          │
+                                                                                                    │           #1          ││          #23          │
+                                                                                                    │           #2          ││          #34          │
+                                                                                                    │           #3          ││                       │
+                                                                                                    │           #4          ││                       │
+                                                                                                    │           #5          ││                       │
+                                                                                                    │                       ││                       │
+                                                                                                    │       1,488 rows      ││       5,601 rows      │
+                                                                                                    │        (0.00s)        ││        (0.00s)        │
+                                                                                                    └───────────┬───────────┘└───────────┬───────────┘
+                                                                                                    ┌───────────┴───────────┐┌───────────┴───────────┐
+                                                                                                    │         WINDOW        ││         FILTER        │
+                                                                                                    │    ────────────────   ││    ────────────────   │
+                                                                                                    │      Projections:     ││     (working AND      │
+                                                                                                    │ sum(count_star()) OVER││ (tvhours_value IS NOT │
+                                                                                                    │      (PARTITION BY    ││  NULL) AND (satjob IS │
+                                                                                                    │   definition, degree) ││       NOT NULL))      │
+                                                                                                    │   RANK_DENSE() OVER   ││                       │
+                                                                                                    │     (PARTITION BY     ││                       │
+                                                                                                    │   definition, degree  ││                       │
+                                                                                                    │  ORDER BY count_star()││                       │
+                                                                                                    │    DESC NULLS LAST)   ││                       │
+                                                                                                    │                       ││                       │
+                                                                                                    │       1,488 rows      ││       5,601 rows      │
+                                                                                                    │        (0.00s)        ││        (0.00s)        │
+                                                                                                    └───────────┬───────────┘└───────────┬───────────┘
+                                                                                                    ┌───────────┴───────────┐┌───────────┴───────────┐
+                                                                                                    │     HASH_GROUP_BY     ││        CTE_SCAN       │
+                                                                                                    │    ────────────────   ││    ────────────────   │
+                                                                                                    │        Groups:        ││      CTE Index: 0     │
+                                                                                                    │           #0          ││                       │
+                                                                                                    │           #1          ││                       │
+                                                                                                    │           #2          ││                       │
+                                                                                                    │                       ││                       │
+                                                                                                    │      Aggregates:      ││                       │
+                                                                                                    │      count_star()     ││                       │
+                                                                                                    │                       ││                       │
+                                                                                                    │       1,488 rows      ││      15,456 rows      │
+                                                                                                    │        (0.00s)        ││        (0.00s)        │
+                                                                                                    └───────────┬───────────┘└───────────────────────┘
+                                                                                                    ┌───────────┴───────────┐
+                                                                                                    │       PROJECTION      │
+                                                                                                    │    ────────────────   │
+                                                                                                    │       definition      │
+                                                                                                    │         degree        │
+                                                                                                    │        indus10        │
+                                                                                                    │                       │
+                                                                                                    │       9,202 rows      │
+                                                                                                    │        (0.00s)        │
+                                                                                                    └───────────┬───────────┘
+                                                                                                    ┌───────────┴───────────┐
+                                                                                                    │       PROJECTION      │
+                                                                                                    │    ────────────────   │
+                                                                                                    │           #5          │
+                                                                                                    │           #9          │
+                                                                                                    │          #34          │
+                                                                                                    │                       │
+                                                                                                    │       9,202 rows      │
+                                                                                                    │        (0.00s)        │
+                                                                                                    └───────────┬───────────┘
+                                                                                                    ┌───────────┴───────────┐
+                                                                                                    │         FILTER        │
+                                                                                                    │    ────────────────   │
+                                                                                                    │  (working AND (degree │
+                                                                                                    │    IS NOT NULL) AND   │
+                                                                                                    │ (indus10 IS NOT NULL))│
+                                                                                                    │                       │
+                                                                                                    │       9,202 rows      │
+                                                                                                    │        (0.00s)        │
+                                                                                                    └───────────┬───────────┘
+                                                                                                    ┌───────────┴───────────┐
+                                                                                                    │        CTE_SCAN       │
+                                                                                                    │    ────────────────   │
+                                                                                                    │      CTE Index: 0     │
+                                                                                                    │                       │
+                                                                                                    │      15,456 rows      │
+                                                                                                    │        (0.00s)        │
+                                                                                                    └───────────────────────┘
 
 AFTER
 ┌─────────────────────────────────────┐
@@ -164,10 +472,10 @@ AFTER
 ││    Query Profiling Information    ││
 │└───────────────────────────────────┘│
 └─────────────────────────────────────┘
-explain analyze with membership as (     select survey_year, respondent_id,            bool_or(filename='yaqeen_cut_a_2014_2016.json') as in_a,            bool_or(filename='yaqeen_cut_b_2016_2018.json') as in_b     from stg_membership group by all ), counts as (     select count(*) filter (where in_a) as a, count(*) filter (where in_b) as b,            count(*) filter (where in_a and in_b) as shared, count(*) filter (where in_a or in_b) as distinct_n     from membership ), grain as (     select count(*) as analysis_rows, count(distinct (survey_year,respondent_id)) as distinct_interview_keys,            count(distinct respondent_id) as distinct_ids_alone from respondents ) select *, round(100.0*shared/nullif(a,0),2) as pct_a, round(100.0*shared/nullif(b,0),2) as pct_b,        analysis_rows-distinct_interview_keys as duplicate_analysis_rows,        distinct_interview_keys-distinct_ids_alone as interviews_lost_using_id_alone from counts cross join grain
+explain analyze -- Reclassify temporarily absent workers only as a sensitivity alternative. with classified as (     select r.*, d.definition,            case when d.definition='Standard: codes 1-3' then wrkstat_value between 1 and 3                 else wrkstat_value between 1 and 2 end as working     from respondents r cross join (values ('Standard: codes 1-3'), ('Alternative: codes 1-2')) d(definition) ), industry as (     select definition, degree as subgroup, indus10 as detail, count(*) as n,            sum(count(*)) over (partition by definition,degree) as denominator,            dense_rank() over (partition by definition,degree order by count(*) desc) as position     from classified where working and degree is not null and indus10 is not null group by definition,degree,indus10 ), tv as (     select definition, satjob as subgroup, count(*) as n, avg(tvhours_value) as value     from classified where working and satjob is not null and tvhours_value is not null group by all ), history as (     select definition, count(*) as n, count(evwork) as denominator,            count(*) filter (where evwork='YES') as yes_n,            count(*)-count(evwork) as missing_n from classified where working=false group by definition ) select 'Q3' as question, definition, subgroup, detail, n, denominator,        round(100.0*n/denominator,2) as value from industry where position=1 union all select 'Q4', definition, subgroup, 'mean TV hours/day', n, n, round(value,2) from tv union all select 'Q5', definition, 'Observed yes', 'nonworkers / valid answers', n, denominator,        round(100.0*yes_n/nullif(denominator,0),2) from history union all select 'Q5', definition, 'Lower bound', 'all missing assigned no', n, denominator,        round(100.0*yes_n/nullif(n,0),2) from history union all select 'Q5', definition, 'Upper bound', 'all missing assigned yes', n, denominator,        round(100.0*(yes_n+missing_n)/nullif(n,0),2) from history order by question,definition,subgroup,detail
 ┌────────────────────────────────────────────────┐
 │┌──────────────────────────────────────────────┐│
-││              Total Time: 0.0062s             ││
+││              Total Time: 0.0306s             ││
 │└──────────────────────────────────────────────┘│
 └────────────────────────────────────────────────┘
 ┌───────────────────────────┐
@@ -180,152 +488,334 @@ explain analyze with membership as (     select survey_year, respondent_id,     
 │          (0.00s)          │
 └─────────────┬─────────────┘
 ┌─────────────┴─────────────┐
-│         PROJECTION        │
+│            CTE            │
 │    ────────────────────   │
-│             a             │
-│             b             │
-│           shared          │
-│         distinct_n        │
-│       analysis_rows       │
-│  distinct_interview_keys  │
-│     distinct_ids_alone    │
-│           pct_a           │
-│           pct_b           │
-│  duplicate_analysis_rows  │
-│interviews_lost_using_id_al│
-│            one            │
-│                           │
-│           1 row           │
-│          (0.00s)          │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│         PROJECTION        │
-│    ────────────────────   │
-│             a             │
-│             b             │
-│           shared          │
-│         distinct_n        │
-│       analysis_rows       │
-│  distinct_interview_keys  │
-│     distinct_ids_alone    │
-│ CAST((100.0 * CAST(shared │
-│    AS DECIMAL(23,0))) AS  │
-│           DOUBLE)         │
-│                           │
-│           1 row           │
-│          (0.00s)          │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│       CROSS_PRODUCT       │
-│    ────────────────────   │
-│           1 row           ├──────────────┐
-│          (0.00s)          │              │
-└─────────────┬─────────────┘              │
-┌─────────────┴─────────────┐┌─────────────┴─────────────┐
-│    UNGROUPED_AGGREGATE    ││    UNGROUPED_AGGREGATE    │
-│    ────────────────────   ││    ────────────────────   │
-│        Aggregates:        ││        Aggregates:        │
-│ count_star() FILTER (WHERE││        count_star()       │
-│       #0) Filter: #0      ││     count(DISTINCT #0)    │
-│ count_star() FILTER (WHERE││     count(DISTINCT #1)    │
-│       #1) Filter: #1      ││                           │
-│ count_star() FILTER (WHERE││                           │
-│       #2) Filter: #2      ││                           │
-│ count_star() FILTER (WHERE││                           │
-│       #3) Filter: #3      ││                           │
-│                           ││                           │
-│           1 row           ││           1 row           │
-│          (0.00s)          ││          (0.00s)          │
-└─────────────┬─────────────┘└─────────────┬─────────────┘
-┌─────────────┴─────────────┐┌─────────────┴─────────────┐
-│         PROJECTION        ││         PROJECTION        │
-│    ────────────────────   ││    ────────────────────   │
-│            in_a           ││     "row"(survey_year,    │
-│            in_b           ││       respondent_id)      │
-│      (in_a AND in_b)      ││       respondent_id       │
-│       (in_a OR in_b)      ││                           │
-│                           ││                           │
-│         7,753 rows        ││         7,753 rows        │
-│          (0.00s)          ││          (0.00s)          │
-└─────────────┬─────────────┘└─────────────┬─────────────┘
-┌─────────────┴─────────────┐┌─────────────┴─────────────┐
-│         PROJECTION        ││         TABLE_SCAN        │
-│    ────────────────────   ││    ────────────────────   │
-│            in_a           ││     Table: respondents    │
-│            in_b           ││   Type: Sequential Scan   │
-│                           ││                           │
-│                           ││        Projections:       │
-│                           ││        survey_year        │
-│                           ││       respondent_id       │
-│                           ││                           │
-│         7,753 rows        ││         7,753 rows        │
-│          (0.00s)          ││          (0.00s)          │
-└─────────────┬─────────────┘└───────────────────────────┘
-┌─────────────┴─────────────┐
-│         PROJECTION        │
-│    ────────────────────   │
-│__internal_decompress_integ│
-│   ral_integer(#0, 2014)   │
-│__internal_decompress_integ│
-│     ral_integer(#1, 1)    │
-│             #2            │
-│             #3            │
-│                           │
-│         7,753 rows        │
-│          (0.00s)          │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│       HASH_GROUP_BY       │
-│    ────────────────────   │
-│          Groups:          │
-│             #0            │
-│             #1            │
-│                           │
-│        Aggregates:        │
-│        bool_or(#2)        │
-│        bool_or(#3)        │
-│                           │
-│         7,753 rows        │
-│          (0.00s)          │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│         PROJECTION        │
-│    ────────────────────   │
-│        survey_year        │
-│       respondent_id       │
-│        (filename =        │
-│  'yaqeen_cut_a_2014_2016  │
-│          .json')          │
-│        (filename =        │
-│  'yaqeen_cut_b_2016_2018  │
-│          .json')          │
-│                           │
-│        10,620 rows        │
-│          (0.00s)          │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│         PROJECTION        │
-│    ────────────────────   │
-│__internal_compress_integra│
-│    l_utinyint(#0, 2014)   │
-│__internal_compress_integra│
-│     l_usmallint(#1, 1)    │
-│             #2            │
-│                           │
-│        10,620 rows        │
-│          (0.00s)          │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│         TABLE_SCAN        │
-│    ────────────────────   │
-│   Table: stg_membership   │
-│   Type: Sequential Scan   │
-│                           │
-│        Projections:       │
-│        survey_year        │
-│       respondent_id       │
-│          filename         │
-│                           │
-│        10,620 rows        │
-│          (0.00s)          │
-└───────────────────────────┘
+│    CTE Name: classified   │
+│       Table Index: 0      ├───────────────────────────────────────────┐
+│                           │                                           │
+│           0 rows          │                                           │
+│          (0.01s)          │                                           │
+└─────────────┬─────────────┘                                           │
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
+│         PROJECTION        │                             │            CTE            │
+│    ────────────────────   │                             │    ────────────────────   │
+│        survey_year        │                             │     CTE Name: history     │
+│       respondent_id       │                             │      Table Index: 31      │
+│         age_value         │                             │                           │
+│           attend          │                             │                           │
+│           ballot          │                             │                           │
+│           degree          │                             │                           │
+│         educ_value        │                             │                           │
+│           evwork          │                             │                           │
+│            form           │                             │                           │
+│          indus10          │                             │                           │
+│          inttech          │                             │                           │
+│            mode           │                             │                           │
+│            news           │                             │                           │
+│          postlife         │                             │                           │
+│      postlife_status      │                             │                           │
+│            ...            │                             │                           │
+│           satjob          │                             │                           ├──────────────┐
+│            sex            │                             │                           │              │
+│       tvhours_value       │                             │                           │              │
+│          wrkstat          │                             │                           │              │
+│       wrkstat_value       │                             │                           │              │
+│       wtssnrps_value      │                             │                           │              │
+│        wtssps_value       │                             │                           │              │
+│        wwwhr_value        │                             │                           │              │
+│        wwwmin_value       │                             │                           │              │
+│      catalogued_items     │                             │                           │              │
+│         is_working        │                             │                           │              │
+│     ever_work_eligible    │                             │                           │              │
+│      web_hours_weekly     │                             │                           │              │
+│         definition        │                             │                           │              │
+│          working          │                             │                           │              │
+│                           │                             │                           │              │
+│        15,456 rows        │                             │           0 rows          │              │
+│          (0.00s)          │                             │          (0.00s)          │              │
+└─────────────┬─────────────┘                             └─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│     BLOCKWISE_NL_JOIN     │                             │         PROJECTION        ││         PROJECTION        │
+│    ────────────────────   │                             │    ────────────────────   ││    ────────────────────   │
+│      Join Type: INNER     │                             │         definition        ││__internal_decompress_strin│
+│                           │                             │             n             ││           g(#0)           │
+│         Condition:        │                             │        denominator        ││             #1            │
+│  (((tvhours_value IS NOT  │                             │           yes_n           ││             #2            │
+│  NULL) AND ((satjob IS NOT│                             │         missing_n         ││             #3            │
+│   NULL) AND CASE  WHEN (  │                             │                           ││             #4            │
+│  (definition = 'Standard: │                             │                           ││             #5            │
+│    codes 1-3')) THEN ((   │                             │                           ││             #6            │
+│ (wrkstat_value <= 3.0) AND│                             │                           ││                           │
+│   constant_or_null(true,  │                             │                           ││                           │
+│    wrkstat_value, 1.0)))  │                             │                           ││                           │
+│  ELSE ((wrkstat_value <= 2│                             │                           ││                           │
+│  .0) AND constant_or_null │                             │                           ││                           │
+│ (true, wrkstat_value, 1.0)│                             │                           ││                           │
+│ ) END)) OR ((CASE  WHEN ( │                             │                           ││                           │
+│  (definition = 'Standard: │                             │                           ││                           │
+│    codes 1-3')) THEN ((   │                             │                           ││                           │
+│ (wrkstat_value <= 3.0) AND│                             │                           ││                           │
+│   constant_or_null(true,  ├──────────────┐              │                           ││                           │
+│    wrkstat_value, 1.0)))  │              │              │                           ││                           │
+│  ELSE ((wrkstat_value <= 2│              │              │                           ││                           │
+│  .0) AND constant_or_null │              │              │                           ││                           │
+│ (true, wrkstat_value, 1.0)│              │              │                           ││                           │
+│    ) END = false) OR (    │              │              │                           ││                           │
+│ (indus10 IS NOT NULL) AND │              │              │                           ││                           │
+│ ((degree IS NOT NULL) AND │              │              │                           ││                           │
+│  CASE  WHEN ((definition =│              │              │                           ││                           │
+│   'Standard: codes 1-3')) │              │              │                           ││                           │
+│  THEN (((wrkstat_value <= │              │              │                           ││                           │
+│  3.0) AND constant_or_null│              │              │                           ││                           │
+│ (true, wrkstat_value, 1.0)│              │              │                           ││                           │
+│ )) ELSE ((wrkstat_value <=│              │              │                           ││                           │
+│  2.0) AND constant_or_null│              │              │                           ││                           │
+│ (true, wrkstat_value, 1.0)│              │              │                           ││                           │
+│         ) END))))         │              │              │                           ││                           │
+│                           │              │              │                           ││                           │
+│        15,456 rows        │              │              │           2 rows          ││          24 rows          │
+│          (0.00s)          │              │              │          (0.00s)          ││          (0.00s)          │
+└─────────────┬─────────────┘              │              └─────────────┬─────────────┘└─────────────┬─────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││      COLUMN_DATA_SCAN     ││       HASH_GROUP_BY       ││          ORDER_BY         │
+│    ────────────────────   ││                           ││    ────────────────────   ││    ────────────────────   │
+│     Table: respondents    ││                           ││         Groups: #0        ││        question ASC       │
+│   Type: Sequential Scan   ││                           ││                           ││       definition ASC      │
+│                           ││                           ││        Aggregates:        ││        subgroup ASC       │
+│        Projections:       ││                           ││        count_star()       ││         detail ASC        │
+│        survey_year        ││                           ││         count(#1)         ││                           │
+│       respondent_id       ││                           ││ count_star() FILTER (WHERE││                           │
+│         age_value         ││                           ││       #1) Filter: #1      ││                           │
+│           attend          ││                           ││                           ││                           │
+│           ballot          ││                           ││                           ││                           │
+│           degree          ││                           ││                           ││                           │
+│         educ_value        ││                           ││                           ││                           │
+│           evwork          ││                           ││                           ││                           │
+│            form           ││                           ││                           ││                           │
+│          indus10          ││                           ││                           ││                           │
+│          inttech          ││                           ││                           ││                           │
+│            mode           ││                           ││                           ││                           │
+│            news           ││                           ││                           ││                           │
+│          postlife         ││                           ││                           ││                           │
+│            ...            ││                           ││                           ││                           │
+│          relig16          ││                           ││                           ││                           │
+│          reliten          ││                           ││                           ││                           │
+│           satjob          ││                           ││                           ││                           │
+│            sex            ││                           ││                           ││                           │
+│       tvhours_value       ││                           ││                           ││                           │
+│          wrkstat          ││                           ││                           ││                           │
+│       wrkstat_value       ││                           ││                           ││                           │
+│       wtssnrps_value      ││                           ││                           ││                           │
+│        wtssps_value       ││                           ││                           ││                           │
+│        wwwhr_value        ││                           ││                           ││                           │
+│        wwwmin_value       ││                           ││                           ││                           │
+│      catalogued_items     ││                           ││                           ││                           │
+│         is_working        ││                           ││                           ││                           │
+│     ever_work_eligible    ││                           ││                           ││                           │
+│      web_hours_weekly     ││                           ││                           ││                           │
+│                           ││                           ││                           ││                           │
+│         7,753 rows        ││           2 rows          ││           2 rows          ││          24 rows          │
+│          (0.00s)          ││          (0.00s)          ││          (0.00s)          ││          (0.00s)          │
+└───────────────────────────┘└───────────────────────────┘└─────────────┬─────────────┘└─────────────┬─────────────┘
+                                                          ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                          │         PROJECTION        ││         PROJECTION        │
+                                                          │    ────────────────────   ││    ────────────────────   │
+                                                          │         definition        ││__internal_compress_string_│
+                                                          │           evwork          ││        uinteger(#0)       │
+                                                          │      (evwork = 'YES')     ││             #1            │
+                                                          │                           ││             #2            │
+                                                          │                           ││             #3            │
+                                                          │                           ││             #4            │
+                                                          │                           ││             #5            │
+                                                          │                           ││             #6            │
+                                                          │                           ││                           │
+                                                          │         6,218 rows        ││          24 rows          │
+                                                          │          (0.00s)          ││          (0.00s)          │
+                                                          └─────────────┬─────────────┘└─────────────┬─────────────┘
+                                                          ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                          │         PROJECTION        ││           UNION           │
+                                                          │    ────────────────────   ││    ────────────────────   │
+                                                          │             #7            ││                           │
+                                                          │            #34            ││                           ├─────────────────────────────────────────────────────────────────────────────────────────────────────┐
+                                                          │                           ││                           │                                                                                                     │
+                                                          │         6,218 rows        ││           0 rows          │                                                                                                     │
+                                                          │          (0.00s)          ││          (0.00s)          │                                                                                                     │
+                                                          └─────────────┬─────────────┘└─────────────┬─────────────┘                                                                                                     │
+                                                          ┌─────────────┴─────────────┐┌─────────────┴─────────────┐                                                                                       ┌─────────────┴─────────────┐
+                                                          │           FILTER          ││           UNION           │                                                                                       │         PROJECTION        │
+                                                          │    ────────────────────   ││    ────────────────────   │                                                                                       │    ────────────────────   │
+                                                          │     (working = false)     ││                           │                                                                                       │            'Q5'           │
+                                                          │                           ││                           │                                                                                       │         definition        │
+                                                          │                           ││                           │                                                                                       │       'Upper bound'       │
+                                                          │                           ││                           │                                                                                       │ 'all missing assigned yes'│
+                                                          │                           ││                           │                                                                                       │             n             │
+                                                          │                           ││                           │                                                                                       │        denominator        │
+                                                          │                           ││                           ├────────────────────────────────────────────────────────────────────────┐              │ round((CAST((100.0 * CAST(│
+                                                          │                           ││                           │                                                                        │              │   (yes_n + missing_n) AS  │
+                                                          │                           ││                           │                                                                        │              │  DECIMAL(23,0))) AS DOUBLE│
+                                                          │                           ││                           │                                                                        │              │ ) / CAST(CASE  WHEN ((n = │
+                                                          │                           ││                           │                                                                        │              │   0)) THEN (NULL) ELSE n  │
+                                                          │                           ││                           │                                                                        │              │     END AS DOUBLE)), 2)   │
+                                                          │                           ││                           │                                                                        │              │                           │
+                                                          │         6,218 rows        ││           0 rows          │                                                                        │              │           2 rows          │
+                                                          │          (0.00s)          ││          (0.00s)          │                                                                        │              │          (0.00s)          │
+                                                          └─────────────┬─────────────┘└─────────────┬─────────────┘                                                                        │              └─────────────┬─────────────┘
+                                                          ┌─────────────┴─────────────┐┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                          │          CTE_SCAN         ││           UNION           │                                                          │         PROJECTION        ││          CTE_SCAN         │
+                                                          │    ────────────────────   ││    ────────────────────   │                                                          │    ────────────────────   ││    ────────────────────   │
+                                                          │        CTE Index: 0       ││                           │                                                          │            'Q5'           ││       CTE Index: 31       │
+                                                          │                           ││                           │                                                          │         definition        ││                           │
+                                                          │                           ││                           │                                                          │       'Lower bound'       ││                           │
+                                                          │                           ││                           │                                                          │ 'all missing assigned no' ││                           │
+                                                          │                           ││                           │                                                          │             n             ││                           │
+                                                          │                           ││                           │                                                          │        denominator        ││                           │
+                                                          │                           ││                           ├───────────────────────────────────────────┐              │ round((CAST((100.0 * CAST ││                           │
+                                                          │                           ││                           │                                           │              │ (yes_n AS DECIMAL(23,0))) ││                           │
+                                                          │                           ││                           │                                           │              │   AS DOUBLE) / CAST(CASE  ││                           │
+                                                          │                           ││                           │                                           │              │  WHEN ((n = 0)) THEN (NULL││                           │
+                                                          │                           ││                           │                                           │              │ ) ELSE n END AS DOUBLE)), ││                           │
+                                                          │                           ││                           │                                           │              │             2)            ││                           │
+                                                          │                           ││                           │                                           │              │                           ││                           │
+                                                          │        15,456 rows        ││           0 rows          │                                           │              │           2 rows          ││           2 rows          │
+                                                          │          (0.00s)          ││          (0.00s)          │                                           │              │          (0.00s)          ││          (0.00s)          │
+                                                          └───────────────────────────┘└─────────────┬─────────────┘                                           │              └─────────────┬─────────────┘└───────────────────────────┘
+                                                                                       ┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                                                       │           UNION           │                             │         PROJECTION        ││          CTE_SCAN         │
+                                                                                       │    ────────────────────   │                             │    ────────────────────   ││    ────────────────────   │
+                                                                                       │                           │                             │            'Q5'           ││       CTE Index: 31       │
+                                                                                       │                           │                             │         definition        ││                           │
+                                                                                       │                           │                             │       'Observed yes'      ││                           │
+                                                                                       │                           │                             │    'nonworkers / valid    ││                           │
+                                                                                       │                           │                             │          answers'         ││                           │
+                                                                                       │                           │                             │             n             ││                           │
+                                                                                       │                           │                             │        denominator        ││                           │
+                                                                                       │                           ├──────────────┐              │ round((CAST((100.0 * CAST ││                           │
+                                                                                       │                           │              │              │ (yes_n AS DECIMAL(23,0))) ││                           │
+                                                                                       │                           │              │              │   AS DOUBLE) / CAST(CASE  ││                           │
+                                                                                       │                           │              │              │  WHEN ((denominator = 0)) ││                           │
+                                                                                       │                           │              │              │      THEN (NULL) ELSE     ││                           │
+                                                                                       │                           │              │              │  denominator END AS DOUBLE││                           │
+                                                                                       │                           │              │              │           )), 2)          ││                           │
+                                                                                       │                           │              │              │                           ││                           │
+                                                                                       │           0 rows          │              │              │           2 rows          ││           2 rows          │
+                                                                                       │          (0.00s)          │              │              │          (0.00s)          ││          (0.00s)          │
+                                                                                       └─────────────┬─────────────┘              │              └─────────────┬─────────────┘└───────────────────────────┘
+                                                                                       ┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                                                       │         PROJECTION        ││         PROJECTION        ││          CTE_SCAN         │
+                                                                                       │    ────────────────────   ││    ────────────────────   ││    ────────────────────   │
+                                                                                       │          question         ││            'Q4'           ││       CTE Index: 31       │
+                                                                                       │         definition        ││         definition        ││                           │
+                                                                                       │          subgroup         ││          subgroup         ││                           │
+                                                                                       │           detail          ││    'mean TV hours/day'    ││                           │
+                                                                                       │             n             ││             n             ││                           │
+                                                                                       │        denominator        ││             n             ││                           │
+                                                                                       │           value           ││      round(value, 2)      ││                           │
+                                                                                       │                           ││                           ││                           │
+                                                                                       │          10 rows          ││           8 rows          ││           2 rows          │
+                                                                                       │          (0.00s)          ││          (0.00s)          ││          (0.00s)          │
+                                                                                       └─────────────┬─────────────┘└─────────────┬─────────────┘└───────────────────────────┘
+                                                                                       ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                                                       │         PROJECTION        ││       HASH_GROUP_BY       │
+                                                                                       │    ────────────────────   ││    ────────────────────   │
+                                                                                       │             #0            ││          Groups:          │
+                                                                                       │             #1            ││             #0            │
+                                                                                       │             #2            ││             #1            │
+                                                                                       │             #3            ││                           │
+                                                                                       │             #4            ││        Aggregates:        │
+                                                                                       │                           ││        count_star()       │
+                                                                                       │                           ││          avg(#2)          │
+                                                                                       │                           ││                           │
+                                                                                       │          10 rows          ││           8 rows          │
+                                                                                       │          (0.00s)          ││          (0.00s)          │
+                                                                                       └─────────────┬─────────────┘└─────────────┬─────────────┘
+                                                                                       ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                                                       │           FILTER          ││         PROJECTION        │
+                                                                                       │    ────────────────────   ││    ────────────────────   │
+                                                                                       │       (position = 1)      ││         definition        │
+                                                                                       │                           ││          subgroup         │
+                                                                                       │                           ││       tvhours_value       │
+                                                                                       │                           ││                           │
+                                                                                       │          10 rows          ││         5,601 rows        │
+                                                                                       │          (0.00s)          ││          (0.00s)          │
+                                                                                       └─────────────┬─────────────┘└─────────────┬─────────────┘
+                                                                                       ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                                                       │         PROJECTION        ││         PROJECTION        │
+                                                                                       │    ────────────────────   ││    ────────────────────   │
+                                                                                       │             #0            ││            #21            │
+                                                                                       │             #1            ││            #23            │
+                                                                                       │             #2            ││            #34            │
+                                                                                       │             #3            ││                           │
+                                                                                       │             #4            ││                           │
+                                                                                       │             #5            ││                           │
+                                                                                       │                           ││                           │
+                                                                                       │         1,488 rows        ││         5,601 rows        │
+                                                                                       │          (0.00s)          ││          (0.00s)          │
+                                                                                       └─────────────┬─────────────┘└─────────────┬─────────────┘
+                                                                                       ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                                                       │           WINDOW          ││           FILTER          │
+                                                                                       │    ────────────────────   ││    ────────────────────   │
+                                                                                       │        Projections:       ││       (working AND        │
+                                                                                       │  sum(count_star()) OVER   ││ (tvhours_value IS NOT NULL│
+                                                                                       │ (PARTITION BY definition, ││) AND (satjob IS NOT NULL))│
+                                                                                       │           degree)         ││                           │
+                                                                                       │     RANK_DENSE() OVER     ││                           │
+                                                                                       │ (PARTITION BY definition, ││                           │
+                                                                                       │       degree ORDER BY     ││                           │
+                                                                                       │   count_star() DESC NULLS ││                           │
+                                                                                       │            LAST)          ││                           │
+                                                                                       │                           ││                           │
+                                                                                       │         1,488 rows        ││         5,601 rows        │
+                                                                                       │          (0.00s)          ││          (0.00s)          │
+                                                                                       └─────────────┬─────────────┘└─────────────┬─────────────┘
+                                                                                       ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                                                       │       HASH_GROUP_BY       ││          CTE_SCAN         │
+                                                                                       │    ────────────────────   ││    ────────────────────   │
+                                                                                       │          Groups:          ││        CTE Index: 0       │
+                                                                                       │             #0            ││                           │
+                                                                                       │             #1            ││                           │
+                                                                                       │             #2            ││                           │
+                                                                                       │                           ││                           │
+                                                                                       │        Aggregates:        ││                           │
+                                                                                       │        count_star()       ││                           │
+                                                                                       │                           ││                           │
+                                                                                       │         1,488 rows        ││        15,456 rows        │
+                                                                                       │          (0.00s)          ││          (0.00s)          │
+                                                                                       └─────────────┬─────────────┘└───────────────────────────┘
+                                                                                       ┌─────────────┴─────────────┐
+                                                                                       │         PROJECTION        │
+                                                                                       │    ────────────────────   │
+                                                                                       │         definition        │
+                                                                                       │           degree          │
+                                                                                       │          indus10          │
+                                                                                       │                           │
+                                                                                       │         9,202 rows        │
+                                                                                       │          (0.00s)          │
+                                                                                       └─────────────┬─────────────┘
+                                                                                       ┌─────────────┴─────────────┐
+                                                                                       │         PROJECTION        │
+                                                                                       │    ────────────────────   │
+                                                                                       │             #5            │
+                                                                                       │             #9            │
+                                                                                       │            #34            │
+                                                                                       │                           │
+                                                                                       │         9,202 rows        │
+                                                                                       │          (0.00s)          │
+                                                                                       └─────────────┬─────────────┘
+                                                                                       ┌─────────────┴─────────────┐
+                                                                                       │           FILTER          │
+                                                                                       │    ────────────────────   │
+                                                                                       │  (working AND (degree IS  │
+                                                                                       │  NOT NULL) AND (indus10 IS│
+                                                                                       │         NOT NULL))        │
+                                                                                       │                           │
+                                                                                       │         9,202 rows        │
+                                                                                       │          (0.00s)          │
+                                                                                       └─────────────┬─────────────┘
+                                                                                       ┌─────────────┴─────────────┐
+                                                                                       │          CTE_SCAN         │
+                                                                                       │    ────────────────────   │
+                                                                                       │        CTE Index: 0       │
+                                                                                       │                           │
+                                                                                       │        15,456 rows        │
+                                                                                       │          (0.00s)          │
+                                                                                       └───────────────────────────┘

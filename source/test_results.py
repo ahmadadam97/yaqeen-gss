@@ -1,19 +1,18 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import json
 import logging
 import unittest
 from unittest.mock import patch
 
 import duckdb
 from load import ROOT
-from run import publish_results, publish_run, main
+from run import publish_run, main
 from snapshot import digest, current_run
 
 
 class ResultsTests(unittest.TestCase):
     def test_complete_run_is_published_and_tampering_is_rejected(self):
-        with TemporaryDirectory(dir=ROOT / "build") as tmp:
+        with TemporaryDirectory(dir=ROOT) as tmp:
             build = Path(tmp)
             (build / "runs").mkdir()
             candidate = build / "candidate"
@@ -32,7 +31,7 @@ class ResultsTests(unittest.TestCase):
                     current_run(build)
 
     def test_failed_pointer_update_preserves_the_previous_publication(self):
-        with TemporaryDirectory(dir=ROOT / "build") as tmp:
+        with TemporaryDirectory(dir=ROOT) as tmp:
             build = Path(tmp)
             (build / "runs").mkdir()
             (build / "LATEST").write_text("prior")
@@ -49,12 +48,12 @@ class ResultsTests(unittest.TestCase):
             self.assertEqual((build / "LATEST").read_text(), "prior")
 
     def test_failed_dbt_keeps_latest_and_cleans_candidate(self):
-        with TemporaryDirectory(dir=ROOT / "build") as tmp:
+        with TemporaryDirectory(dir=ROOT) as tmp:
             build = Path(tmp)
             (build / "LATEST").write_text("prior")
             with patch.dict("os.environ", {}, clear=True), patch("run.build_root",return_value=build):
                 with patch("run.load"), patch("run.logging.FileHandler",return_value=logging.NullHandler()), patch("run.subprocess.run",side_effect=RuntimeError("bad model")):
-                    with self.assertRaisesRegex(RuntimeError, "bad model"):
+                    with self.assertLogs(level="ERROR"), self.assertRaisesRegex(RuntimeError, "bad model"):
                         main()
             self.assertEqual((build / "LATEST").read_text(), "prior")
             self.assertFalse((build / ".run.lock").exists())

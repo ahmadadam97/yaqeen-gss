@@ -5,7 +5,9 @@ import re
 from io import BytesIO
 from pathlib import Path
 
-import duckdb
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "source"))
+from snapshot import current_run
 from pypdf import PdfReader, PdfWriter
 from pypdf.generic import ArrayObject, DictionaryObject, NameObject as N, NumberObject, RectangleObject, TextStringObject
 from reportlab.lib.colors import HexColor
@@ -13,10 +15,8 @@ from reportlab.lib.utils import simpleSplit
 from reportlab.pdfgen.canvas import Canvas
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = ROOT / "build"
-RESULTS = BUILD / "results"
-if not (RESULTS / "_SUCCESS").exists():
-    raise SystemExit("Run source/run.py successfully first.")
+RUN, MANIFEST = current_run()
+RESULTS = RUN / "results"
 
 def rows(name):
     with (RESULTS / (name + ".csv")).open(encoding="utf8", newline="") as f:
@@ -102,12 +102,12 @@ for i,(key,title) in enumerate([("news","Newspaper"),("tvhours","TV hours"),("ww
         part=[r for r in coverage if r["survey_year"]==w["survey_year"] and r["variable"]==key]
         pct=100*sum(int(r["valid_n"]) for r in part)/sum(int(r["interviews"]) for r in part)
         x=198+122*j; bar(x,y-7,66,pct,100);txt(x+70,y,f"{pct:.0f}%",9)
-para(42,382,"Ballot C had no valid news, TV, computer-use or web-hours answers in any wave. INTTECH had valid answers on B/X, B/Y and C/Y in 2014, then A/X, A/Y and B/X in 2016 and 2018. Letters before the slash identify the ballot and letters after it identify the form. Of 3,797 who answered, 41% were very interested and 46% moderately interested.",526,10,13)
+para(42,382,"Ballot C had no valid news, TV, computer-use or web-hours answers in any wave. INTTECH had valid answers on B/X, B/Y and C/Y in 2014, then A/X, A/Y and B/X in 2016 and 2018. Letters before the slash identify the ballot and letters after it identify the form. Technology estimates describe only valid answers; the accompanying CSV provides counts and coverage.",526,10,13)
 section(460,"Question map   /   fields and eligibility")
 mapping=[
 ("Work and history","WRKSTAT includes temporary absence as working. EVWORK asks about at least one year. Current workers and job seekers skipped it, so their lifetime duration is unknown. Q5 bounds the missing answers."),
 ("Education and industry","DEGREE measures credentials; EDUC measures years. Use INDUS10 for current workers so a prior industry's label is not mistaken for a current job."),
-("Satisfaction and media","In 2016, Ballot A/Form Y used alternate work-satisfaction wording. Q4 keeps only standard SATJOB. TVHOURS measures daily duration, NEWS measures frequency, and zero hours counts."),
+("Satisfaction and media","In 2016, Ballot A/Form Y used alternate work-satisfaction wording. Q4 keeps only standard SATJOB. Code 3 keeps temporarily absent workers employed. Reclassifying its 150 cases changes Q3-Q5 samples (CSV 14). TVHOURS measures daily duration."),
 ("Faith and technology","RELIG16 is upbringing, RELIG current preference, ATTEND attendance, RELITEN strength. PRAY is ordered frequency; POSTLIFE is belief. INTTECH is interest, not usage."),
 ("Web duration","WWWHR + WWWMIN / 60 measures weekly non-email web time. Require both fields. A skip is unknown. Age, sex, region, ballot, form and mode retain context.")]
 for i,(label,body) in enumerate(mapping):
@@ -131,17 +131,18 @@ section(421,"04  TV hours and job satisfaction")
 for j,r in enumerate(sat):
     x=42+j*133; txt(x,445,r["satisfaction"],9,"Helvetica-Bold")
     txt(x,470,r["mean_tv_hours"],19,"Times-Bold",teal);txt(x,486,"hours/day; n="+num(r["group_n"]),8.5)
-with duckdb.connect(str(Path(os.environ.get("GSS_DB",BUILD/"gss.duckdb")).resolve()),read_only=True) as db:
-    satisfied,valid,working=db.execute("""select count(*) filter(where satjob in ('Very satisfied','Moderately satisfied')),count(satjob),count(*) from respondents where is_working""").fetchone()
-    medians=db.execute("""select median(tvhours_value) from respondents where is_working and satjob is not null and tvhours_value is not null group by satjob""").fetchall()
-    web_check=db.execute((ROOT/"report/web-sensitivity.sql").read_text(encoding="utf8")).fetchall()
+summary=rows("12_report_summary")[0]
+satisfied=int(summary["satisfied_n"])
+valid=int(summary["satisfaction_valid_n"])
+working=int(summary["workers_n"])
+web_check=[(r["age_band"],int(r["added_n"]),float(r["median_hours"])) for r in rows("13_web_sensitivity")]
 paired_yes=sum(int(r["group_n"]) for r in sat if r["satisfaction"] in ("Very satisfied","Moderately satisfied"))
-median_note="Median TV: 2 h in each group. " if set(medians)=={(2,)} else ""
-para(42,507,f"Of {num(working)} workers, {num(satisfied)}/{num(valid)} who answered were satisfied ({100*satisfied/valid:.2f}%); among TV pairs: {num(paired_yes)}/{num(rank['n'])} ({100*paired_yes/int(rank['n']):.2f}%). {median_note}Neither test detected an association: Spearman rho {float(rank['rho']):.3f}, p={float(rank['spearman_p']):.2f}; Kruskal-Wallis p={float(rank['kw_p']):.2f}. Tests ignore survey design.",526,9.7,13)
+median_note="Median TV: 2 h in each group. " if int(summary["groups_with_median_not_two"])==0 and int(rank["n"])>0 else ""
+para(42,507,f"Of {num(working)} workers, {num(satisfied)}/{num(valid)} who answered were satisfied ({100*satisfied/valid:.2f}%); among TV pairs: {num(paired_yes)}/{num(rank['n'])} ({100*paired_yes/int(rank['n']):.2f}%). {median_note}The observed rank association is very small. Spearman rho {float(rank['rho']):.3f}, p={float(rank['spearman_p']):.2f}; Kruskal-Wallis p={float(rank['kw_p']):.2f}. Tests ignore survey design.",526,9.7,13)
 section(567,"05  Ever worked at least one year")
 para(42,587,f"Of {num(hist['nonworking_n'])} nonworkers, {hist['job_seekers_routed_out_n']} job seekers were skipped and {hist['eligible_missing_n']} eligible answers missing. Yes: {num(hist['yes_n'])}/{num(hist['valid_n'])} ({hist['yes_pct_of_valid']}%). Across all nonworkers the possible range is {hist['lower_bound_pct']}-{hist['upper_bound_pct']}%.")
 section(646,"06  News and TV across waves")
-para(42,666,"Daily readership: "+" / ".join(f"{float(w['daily_news_pct']):.1f}%" for w in change)+". Mean TV hours: "+" / ".join(w["mean_tv_hours"] for w in change)+". Only the first news drop exceeded two approximate standard errors. These are separate samples; the comparison does not establish a national trend.")
+para(42,666,"Daily readership: "+" / ".join(f"{float(w['daily_news_pct']):.1f}%" for w in change)+". Mean TV hours: "+" / ".join(w["mean_tv_hours"] for w in change)+". The first news drop is 2.67 approximate standard errors. Errors omit survey design and multiplicity. Weighted, design-based results could change this assessment.")
 txt(42,729,"Q7   /   See Sample for the overlap audit. Detailed counts: report/results/01-07.",9,"Helvetica-Bold",teal)
 c.showPage()
 
@@ -149,19 +150,19 @@ page(3,"What I built, and why","One local batch, one interview key, and an expli
 section(202,"From immutable file to usable answer")
 for j,(a,b) in enumerate([("01  RAW","File + row"),("02  MEMBERSHIP","Year + ID"),("03  ANSWERS","Item + status"),("04  RESPONDENTS","One interview")]):
     x=42+j*134;rect(x,221,124,53,pale);txt(x+7,239,a,8,"Helvetica-Bold",teal);txt(x+7,258,b,11,"Times-Bold")
-para(42,297,"Python reads the strict JSON export (the companion is a Python literal), validates aligned arrays and keys, and loads DuckDB in a transaction. dbt tables preserve membership, decode each variable once, then pivot answers. Versioned seeds distinguish genuine zero from inapplicable, don't know, no answer and not asked that year. Lower snake case; _value is numeric, _status explains availability.")
+para(42,297,"Python reads the strict JSON export (the companion is a Python literal), validates aligned arrays and keys, and loads DuckDB in a transaction. dbt tables preserve membership, decode each variable once, then pivot answers. Seeds distinguish zero, routed skips, unknown answers and year/ballot unavailability. source_status retains the original codebook meaning. Lower snake case; _value is numeric, _status explains availability.")
 section(379,"Three engineering decisions")
 for y,tag,body in [
-(396,"MATERIALIZE  /  PAY ONCE","A view re-parsed raw keys on each overlap audit. Materializing the four keys adds build cost and storage but avoids repeated parsing. The slowest baseline gave identical results."),
-(459,"RERUN  /  VALIDATE AGAIN","Revalidate unchanged files against current metadata; skip duplicate inserts. A conflict rolls back the raw load. dbt build and tests gate docs and staged CSV publication. CI runs on pushes and PRs; failures stop publication."),
+(396,"MATERIALIZE  /  PAY ONCE","Tables store parsed keys, decoded items and wide interviews once per build. Reusing the wide table speeds the new work-status sensitivity query. Read-time savings add build and storage cost."),
+(459,"RERUN  /  VALIDATE AGAIN","Validate reviewed input hashes and counts before building each candidate. A fresh candidate and its input/output manifest must pass dbt and SQL before LATEST is replaced. The prior publication survives a failure. CI uses the same checks."),
 (522,"SCALE  /  CHANGE ONLY WHEN NEEDED","DuckDB avoids a server for two periodic extracts. At full scale the dense model approaches 530 million cells. Read only needed fields and rebuild affected waves before adding managed compute.")]:
     decision(y,tag,body)
 plan=(ROOT/"report/query-plans.txt").read_text(encoding="utf8")
 before,after=map(float,re.search(r"Before: ([\d.]+) ms; after: ([\d.]+) ms",plan).groups())
-section(606,"Overlap query   /   measured runtime")
+section(606,"Work-status sensitivity   /   runtime")
 for j,(label,v) in enumerate([("Before",before),("After",after)]):
     y=627+17*j;txt(42,y,label,9);bar(103,y-7,170,v,before);txt(281,y,f"{v:.2f} ms",9,"Helvetica-Bold")
-para(367,625,"Median of three warm runs, one thread. New extracts are inserted once; downstream tables rebuild.",201,9,12,muted)
+para(367,625,"Median of three warm runs, one thread. Each candidate rebuilds from reviewed extracts. Tables and outputs publish together.",201,9,12,muted)
 para(42,678,"Oversight and effort: I spent roughly six hours choosing extracts, discussing tradeoffs and reviewing the work. I supplied both cuts and challenged the TV and employment interpretations. Codex wrote the code and SQL, ran checks and helped write the report; an AI reviewer challenged the scope. For population claims I would next add survey strata and sampling units.",526,9.6,13)
 c.showPage()
 
