@@ -8,3 +8,7 @@ Use DuckDB because it supports SQL analytics and dbt in a single local file. The
 The design assumes column indices align in the Explorer export, code meanings are stable across these selected waves, and every original file remains available. If these assumptions fail, investigate before combining records. Descriptive results use observed answers and display denominators.
 
 Local setup and the run command are in the [README](../README.md#run-from-the-repository-root). The measured change from the planned membership view to a table is documented in the report.
+
+## Current publication design after review
+
+The initial note is preserved above. The current runner rebuilds a candidate database from all reviewed sources, validates it through dbt and publishes the complete run through one atomic LATEST pointer. This trades a cheap full rebuild for straightforward recovery and a consistent database/results pair. Source membership remains fully auditable. Wide projections, work-status meaning and ballot/form eligibility now come from seeds. source_status preserves the codebook missing kind; status can explain an excluded ballot/form combination. The run manifest records inputs, definitions, counts and output hashes. See review-response.md for the rationale and remaining limits.

@@ -1,16 +1,21 @@
+-- depends_on: {{ ref('variables') }}
+{% set columns = run_query('select variable, wide_label, wide_value, wide_status from ' ~ ref('variables') ~ ' order by variable') if execute else [] %}
 with pivoted as (
     select survey_year, respondent_id,
-    {% for var in ['wrkstat','evwork','degree','indus10','satjob','postlife','pray','relig16','relig','attend','reliten','news','inttech','sex','region','form','mode','ballot'] %}
-        max(answer_label) filter (where variable='{{ var }}') as {{ var }},
+    {% for variable, label, value, status in columns %}
+      {% if label %}
+        max(answer_label) filter (where variable='{{ variable }}') as {{ variable }},
+      {% endif %}
+      {% if value %}
+        max(answer_value) filter (where variable='{{ variable }}') as {{ variable }}_value,
+      {% endif %}
+      {% if status %}
+        max(status) filter (where variable='{{ variable }}') as {{ variable }}_status,
+      {% endif %}
     {% endfor %}
-    {% for var in ['age','educ','tvhours','wwwhr','wwwmin','wtssps','wtssnrps','wrkstat','pray'] %}
-        max(answer_value) filter (where variable='{{ var }}') as {{ var }}_value,
-    {% endfor %}
-        max(status) filter (where variable='postlife') as postlife_status
-    from {{ ref('answers') }}
-    group by survey_year, respondent_id
+        count(*) as catalogued_items
+    from {{ ref('answers') }} group by survey_year, respondent_id
 )
-select *, wrkstat_value between 1 and 3 as is_working,
-       wrkstat_value between 5 and 8 as ever_work_eligible,
+select p.*, s.is_working, s.ever_work_eligible,
        wwwhr_value + wwwmin_value / 60.0 as web_hours_weekly
-from pivoted
+from pivoted p left join {{ ref('work_status') }} s on p.wrkstat_value=s.source_code

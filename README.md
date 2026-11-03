@@ -1,56 +1,88 @@
-# GSS survey interviews | 2014, 2016 and 2018
+# GSS interviews | 2014, 2016 and 2018
 
-A local Python, DuckDB and dbt project for analysing employment, religiosity and media use across three US General Social Survey waves. The respondent table contains 7,753 interviews. The shared 2016 wave is retained in source membership and counted once in the six substantive queries.
+A local Python, DuckDB and dbt pipeline for two independently selected NORC survey extracts. It counts 7,753 interviews using (survey year, respondent ID). Each successful publication contains one database, its complete results, dbt documentation and a provenance manifest.
 
 ## Run from the repository root
 
-Use Python 3.12 (tested with 3.12.10). Install from the pinned dependency file into a fresh virtual environment. Windows PowerShell:
+Use Python 3.12 (tested with 3.12.10). Windows PowerShell:
 
 ```powershell
 py -3.12 -m venv .env
-.env\Scripts\python.exe -m pip install -r requirements.txt
-.env\Scripts\python.exe source/run.py
+.env\Scripts\python.exe -m pip install --require-hashes --only-binary=:all: -r requirements.lock
+.env\Scripts\python.exe -m pip check
 .env\Scripts\python.exe -m unittest discover -s source -p "test_*.py" -v
+.env\Scripts\python.exe source/run.py
 ```
 
-On macOS or Linux use `python3.12 -m venv .env` and substitute `.env/bin/python` for the interpreter above. The core run requires no credentials or cloud services. An optional GSS_DB environment variable selects the database file. Its parent directory must exist.
+On macOS or Linux, use `python3.12 -m venv .env` and substitute `.env/bin/python`. The pinned requirements.lock contains wheel hashes verified against PyPI release metadata. requirements.txt lists the same versions in readable form. No cloud resources or credentials are required.
 
-The runner hashes and loads new raw files together in a transaction, invokes dbt build (seeds, models and tests), generates documentation, then runs the eleven SQL files and the Q4 rank checks. A failed stage exits nonzero and stops the remaining stages. Inspect build/run.log and dbt/logs/dbt.log. Results are staged until every query and diagnostic succeeds. build/results is reserved for generated files; a successful publish removes CSVs from retired queries. Use the CSVs only when build/results/_SUCCESS is present. It is cleared before every run and written after publication. Correct the source or metadata and rerun the same command. Both named cuts and all previously loaded files must remain in place. A renamed file or identical bytes under two filenames is rejected. For intentional source revisions, preserve old inputs separately and use a fresh database for the new, documented snapshot. There is no scheduler to operate. The trigger is a manual run after files or definitions change.
+## One complete publication
+
+Every attempt builds a fresh `build/runs/.candidate-.../gss.duckdb` from reviewed input files. It validates their manifest, builds and tests dbt, generates documentation, then executes all SQL and the TV diagnostic. All tables rebuild at this scale. After closing the database, it hashes the database and every result and writes a manifest with the run ID, input hashes/counts, definition hashes, row counts and dbt build invocation ID. It renames the completed candidate directory and atomically replaces the small `build/LATEST` pointer on the same filesystem.
+
+Readers resolve LATEST once and verify the output hashes. A failure before pointer replacement leaves the prior successful publication available. Per-file replacement cannot expose a mixed published result set. The local filesystem must support atomic rename. A .run.lock directory enforces one writer; after an interrupted process, confirm it has stopped before removing that lock. Unreferenced complete runs can remain after a pointer-write failure. Retain or remove old runs deliberately.
+
+**Configuration and migration.** `GSS_BUILD` optionally selects another build directory. The old `GSS_DB` runner override is replaced by GSS_BUILD because database and CSV selection must be coupled. Unset a legacy GSS_DB before invoking the runner or renderer. The runner supplies candidate GSS_DB only to dbt. Old build/gss.duckdb and build/results from earlier versions are legacy artifacts; LATEST is authoritative.
+
+To inspect the current run from the project environment:
+
+```python
+import sys
+sys.path.insert(0, "source")
+from snapshot import current_run
+folder, manifest = current_run()
+print(folder / "gss.duckdb")
+print(manifest["row_counts"])
+```
+
+Use that database read-only for analysis. To serve its dbt documentation, select that run's dbt target directory in the dbt docs serve command. No credentials are stored. build/run.log and dbt/logs/dbt.log record stages, hashes, counts and exceptions. The trigger is a manual run after a reviewed extract or definition changes.
+
+## Recovery and reviewed source data
+
+docs/extracts.csv records the two exact JSON filenames, hashes, row counts, years and export settings. The loader asserts file membership, byte hashes, counts and years before accepting the candidate. This detects a truncated first input as well as later changes. Column lengths, keys, codebook drift and overlap conflicts are also checked. A field intentionally absent in an extract retains absent_field.
+
+For a malformed or semantically invalid new snapshot, the candidate fails and is discarded. Correct the source or metadata, review/update its manifest entry where source bytes intentionally changed, then run the same command. The previous published run remains available until success. A hash update is an explicit review decision; blindly recomputing hashes would defeat this check. A manifest cannot prove that an upstream export's equally long columns were correctly aligned.
+
+The low-level load() function still supports transactional incremental inserts for its isolated tests. The production runner intentionally uses an empty candidate each time. Rerun safety now comes from complete reconstruction and atomic publication, so it does not depend on an insert-skip shortcut.
 
 ## Where to look
 
 | Path | Contents |
 |---|---|
-| source/data/raw | Two original strict JSON exports |
-| docs/profile.md and profile.csv | Pre-build profile, including all 96 variable/year combinations |
-| docs/design.md and naming.md | Grain, database, transformations, assumptions and naming |
-| source/load.py and run.py | Ingestion, validations and stage ordering |
-| dbt/seeds and dbt/models | Code meanings, reviewed waves, numeric domains, interviews and answers |
-| source/sql | Six analyses, the membership audit, two coverage/technology supplements and two research extensions |
-| source/tv_diagnostics.py | SciPy rank tests on the Q4 working sample |
-| report | Short report, [result interpretation guide](report/results/README.md), complete results and measured query plans |
-| build | Generated DuckDB file, execution log and new result CSVs |
-| dbt/target | Generated documentation, compiled SQL and test results |
+| docs/profile.md and profile.csv | Original pre-build profile for all 96 variable/year combinations |
+| docs/extracts.csv | Reviewed source manifest |
+| docs/design.md and naming.md | Initial design, current divergence and conventions |
+| docs/review-response.md | Accepted/rejected feedback, source definitions, evidence and limitations |
+| source/load.py, run.py and snapshot.py | Ingestion, candidate orchestration and verified reader |
+| dbt/seeds | Codebook, variable domains/projections, ballot/form eligibility and work-status definitions |
+| dbt/models and tests | Membership, canonical answers, wide respondents and data expectations |
+| source/sql | Six required analyses, overlap audit, coverage/research extensions and report/sensitivity outputs |
+| report/results | Committed analytical output and interpretation guide |
+| report/survey-assessment.pdf | Five-page interactive report |
+| build/runs/<run ID> | Generated database, CSVs, manifest and dbt artifacts |
+| .github/workflows/check.yml | Clean installation, Python tests, dbt build/docs and result comparison |
 
-Run dbt commands directly from dbt/ using the environment's dbt executable with `--profiles-dir .`. Use `dbt docs serve --profiles-dir .` after the runner succeeds to browse the model documentation.
+## Metadata and missing values
 
-Run `python source/benchmark.py` with the same environment after the pipeline to reproduce the query comparison. It times all eleven SQL queries, checks equal results for the slowest query and writes both physical plans to report/query-plans.txt. Timings depend on the machine.
+variables.csv chooses label/value/status projections in the wide table. Jinja reads those flags after the seed dependency is built. A new item can enter the canonical answer model through its catalog and codebook entries. Set projection flags if analysts also need it in the wide table.
 
-## Bonuses and handoff
+eligibility.csv expresses the reviewed year/ballot/form availability for split items. A source .i outside that item's eligible combinations becomes not_asked_ballot. The original codebook meaning is preserved separately in source_status. Other .i answers remain inapplicable. Unknown ballot/form combinations retain unknown eligibility. An observed answer that violates a reviewed eligibility rule fails a test. work_status.csv marks codes 1-3 as employed and codes 5-8 as eligible for EVWORK.
 
-**Five-page PDF.** Open `report/survey-assessment.pdf`; the section tabs work as page links. On Research, select WTSSPS or WTSSNRPS to change the chart in a PDF reader that supports optional-content layers. The default chart works in print. To regenerate after a successful pipeline run, use the same project environment and GSS_DB, install the optional report packages (`python -m pip install reportlab==4.4.9 pypdf==6.10.0`), then run `python report/build_report.py`. The renderer reads build/results, the matching database and the benchmark recorded in report/query-plans.txt.
+## Report and performance
 
-- [Question map, weights and panel practice](docs/analyst-guide.md): why the two research extensions follow from the brief, weighting rules and limits.
-- [Production sketch](docs/production.md): full-scale AWS storage, compute, schedule, permissions and costs; source contracts for Pew and a possible Yaqeen pilot. Design only.
-- [GitHub Actions](.github/workflows/check.yml): pushes and pull requests run Python tests and the complete pipeline, including dbt tests. A failing dbt build exits nonzero before documentation and CSV publication. Once hosted, require the `survey-checks` check in branch protection to block merging. No hosted run or protection rule is claimed.
+After the pipeline succeeds, install optional `reportlab==4.4.9` and `pypdf==6.10.0`, then run `python report/build_report.py` in that environment. The renderer verifies the selected publication and reads all statistics from its CSVs. It has no database-query path. Tabs link pages and the Research page switches survey weights in supporting viewers.
 
-## Reproduce the inputs
+Run `python source/benchmark.py` to compare the current run's compiled-view baselines with its tables. It verifies equal rows for every query and writes plans for the slowest one to report/query-plans.txt. Durations include fetching and exclude the materialization/build cost. Machine timings vary.
 
-Two consecutive runs against the same initially empty database were checked on 2 November 2026. The first loaded 10,620 raw rows from two files. The second revalidated both files against the current codebook and skipped both inserts. Both runs produced 232,590 decoded answers and 7,753 interviews. SHA-256 digests of the ordered contents of all four relations (raw files, raw records, answers and respondents) matched, and all twelve result CSVs were byte-identical. All five dbt data tests passed on both runs. The original seven analyses also retained every previously reported number after the extra columns and diagnostics were added. The loader's unit tests independently exercise reversed load order and rollback.
+## Bonuses and CI
 
-### Explorer recipe
+The question/weight guide is in docs/analyst-guide.md. docs/production.md sketches AWS storage, execution, scheduling, permissions, costs and additional sources. These are proposed operations.
 
-In [GSS Data Explorer](https://gssdataexplorer.norc.org), create two independent extracts. Select all variables below, apply no case or complete-case filters, and select JSON plus the metadata workbook (Label). Select 2014 and 2016 for A, then 2016 and 2018 for B. Download both from MyGSS → Extracts → Actions → Download. Inside each archive open batch_0.zip and take result/post_processing_output.json unchanged. Use the cut name as its filename in source/data/raw. The companion GSS.json has equivalent records in Python literal notation. Exact exports can change when NORC publishes a new release.
+The workflow runs on pushes and pull requests. A failed dbt build stops docs and results. The final CI step verifies the publication and compares every committed CSV. Configure branch protection to require the survey-checks job if a failure should block merging.
+
+## Reproduce the extracts
+
+In [GSS Data Explorer](https://gssdataexplorer.norc.org), build independent cuts A (2014/2016) and B (2016/2018), with no case or complete-case filters. Select JSON and the metadata workbook (Label). Download from MyGSS → Extracts. Open batch_0.zip and retain result/post_processing_output.json byte-for-byte under the cut name in source/data/raw. The companion GSS.json uses Python literal notation. Future NORC releases can produce different bytes and require a newly reviewed snapshot.
 
 ```
 year id_ ballot form mode age sex region
@@ -60,11 +92,8 @@ news tvhours inttech wwwhr wwwmin compuse webmob emailhr emailmin usewww
 wtssps wtssnrps
 ```
 
-A SHA-256: cde0398f3882f45028b93523e98d66f969cdef21f727f97b4ca9b509a6f5976f  
-B SHA-256: 46ef44eb95319098e7990e41cf470738fd0f8c22193e1aabde2bf97ae9fe6e7b
-
-Codebook seed values come from the CodeLabel dictionaries in both supplied files. The decoded model joins the exported text to each variable's labels. A number with a unit label uses its mapped code, including zero hours. Unlabelled numeric measurements use documented domain checks. Two industry codes share the label “Uncodeable”; neither is assigned a numeric industry. The full raw code mapping is retained.
+The cuts contain 5,405 and 5,215 records, sharing 2,867 interviews. Their union has 7,753. The initial profile and design preceded the implementation in Git history.
 
 ## Source
 
-Davern, Michael; Bautista, Rene; Freese, Jeremy; Herd, Pamela; and Morgan, Stephen L;, General Social Surveys, 1972–2024 [machine-readable data file] /Principal Investigator, Smith, Tom W.; Co-Principal Investigators, Rene Bautista, Jeremy Freese, Pamela Herd, and Stephen L. Morgan; Sponsored by National Science Foundation. --NORC ed.-- Chicago: NORC, 2025: NORC at the University of Chicago [producer and distributor]. Data accessed from the GSS Data Explorer website at [gssdataexplorer.norc.org](https://gssdataexplorer.norc.org/). Citation follows the [Data Explorer terms](https://gssdataexplorer.norc.org/terms_and_conditions). The [NORC questionnaires](https://gss.norc.org/get-documentation/questionnaires.html) document survey wording and routing.
+Davern, Michael; Bautista, Rene; Freese, Jeremy; Herd, Pamela; and Morgan, Stephen L;, General Social Surveys, 1972–2024 [machine-readable data file] /Principal Investigator, Smith, Tom W.; Co-Principal Investigators, Rene Bautista, Jeremy Freese, Pamela Herd, and Stephen L. Morgan; Sponsored by National Science Foundation. --NORC ed.-- Chicago: NORC, 2025: NORC at the University of Chicago [producer and distributor]. Data accessed from the GSS Data Explorer at [gssdataexplorer.norc.org](https://gssdataexplorer.norc.org/). Citation follows the [Data Explorer terms](https://gssdataexplorer.norc.org/terms_and_conditions). The [NORC questionnaires](https://gss.norc.org/get-documentation/questionnaires.html) document wording and routing.

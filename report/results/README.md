@@ -2,7 +2,7 @@
 
 **Where are the answers?** Open the [five-page report](../survey-assessment.pdf). Page 3 (**Findings**, sections 01-06) summarizes the six analytical questions. Open the full results: [01 prayer by upbringing](01_prayer.csv), [02 afterlife by year, including not asked](02_afterlife.csv), [03 top industry by degree](03_industry.csv), [04 TV hours and satisfaction](04_tv_satisfaction.csv) and [rank tests](04_tv_rank_tests.csv), [05 work history among nonworkers](05_ever_work.csv), [06 changes between waves](06_wave_changes.csv). The queries have matching names in [source/sql](../../source/sql).
 
-**The eleven questions about each respondent** are columns of the `respondents` table in `build/gss.duckdb`; page 2 (**Coverage**) explains the field choices. To see actual answers instead of aggregates, run this read-only query after building the database:
+**The eleven questions about each respondent** are columns of the `respondents` table in the published run database resolved through `build/LATEST`; page 2 (**Coverage**) explains the field choices. To see actual answers instead of aggregates, run this read-only query after building the database:
 
 ```sql
 select survey_year, respondent_id,
@@ -33,6 +33,9 @@ Each row of respondents is one (survey year, respondent ID) interview. Q1-Q6 agg
 | 08_technology_interest | Section 1 supplement. Interest in new inventions and technologies among valid answers by wave and pooled. Coverage uses all interviews as denominator. |
 | 09_ballot_coverage | Counts valid answers out of all interviews for each year, ballot and field. Ballot C has no valid NEWS, TVHOURS, COMPUSE or WWWHR in any selected year. INTTECH has a different ballot/form pattern. |
 | 10_prayer_afterlife | Belief by prayer group and wave. Counts distinguish valid prayer from valid belief. WTSSPS is primary; WTSSNRPS is a sensitivity check. This cannot establish cause or describe Muslims specifically. |
+| 12_report_summary | Published worker/satisfaction counts and median checks used by the PDF. |
+| 13_web_sensitivity | Explicit nonusers with routed duration skips are zero only in this alternative. |
+| 14_work_status_sensitivity | Reclassifies temporarily absent workers to quantify changes to Q3-Q5. |
 | 11_media_by_age | Daily newspaper share and median weekly non-email web time among the same people with known age and both answers. Counts show what is lost using paired responses. Web use does not measure access or preference. |
 
 To reproduce the satisfaction rates and medians on page 3, run this against the built database. For the overall rate, sum the two satisfied categories and divide by all four categories in `answered_satisfaction`. For the TV comparison, repeat using `also_answered_tv`. A missing TV response does not exclude someone from the first rate.
@@ -43,3 +46,5 @@ select satjob, count(*) as answered_satisfaction, count(tvhours_value) as also_a
 from respondents where is_working and satjob is not null
 group by satjob order by satjob;
 ```
+
+The current database and CSVs are selected together by source/snapshot.py. The PDF reads published CSV statistics exclusively. The baseline display keeps the codebook employment definition.

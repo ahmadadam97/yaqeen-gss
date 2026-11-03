@@ -21,6 +21,8 @@ models:
       - {name: variable, description: Explorer variable name.}
       - {name: raw_label, description: Original exported text including missing labels.}
       - {name: source_code, description: Code mapped from an unambiguous label when supplied.}
+      - {name: source_status, description: Missing or answer kind from the original codebook.}
+      - {name: is_eligible, description: Reviewed ballot/form eligibility; null where no split rule applies.}
       - {name: status, description: Meaning of the response or reason it is unavailable.}
       - {name: answer_label, description: Readable response for genuine answers only.}
       - {name: answer_value, description: Measured value or categorical code. Average only quantitative measures.}
@@ -60,3 +62,9 @@ models:
       - {name: is_working, description: "Full-time or part-time employment or temporarily absent from a job."}
       - {name: ever_work_eligible, description: "Work status codes 5 through 8 routed to EVWORK."}
       - {name: web_hours_weekly, description: "Hours plus fractional minutes when both components are observed."}
+
+seeds:
+  - name: eligibility
+    description: Reviewed item availability by wave and numeric ballot/form codes. Inapplicable labels outside the reviewed combinations become not_asked_ballot.
+  - name: work_status
+    description: Codebook-based employment and EVWORK eligibility flags.

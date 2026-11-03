@@ -4,7 +4,7 @@ with expected(raw_prefix, wanted) as (
 )
 select a.survey_year, a.respondent_id, a.variable
 from {{ ref('answers') }} a join expected e on starts_with(a.raw_label, e.raw_prefix)
-where a.status <> e.wanted
+where a.source_status <> e.wanted
 union all
 select survey_year, respondent_id, variable from {{ ref('answers') }}
 where variable='tvhours' and raw_label='0 hours'

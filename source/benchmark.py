@@ -5,6 +5,7 @@ import time
 
 import duckdb
 from load import ROOT
+from snapshot import current_run
 
 
 def measure(con, sql):
@@ -18,12 +19,13 @@ def measure(con, sql):
 
 
 if __name__ == "__main__":
-    db = os.environ.get("GSS_DB", str(ROOT / "build/gss.duckdb"))
-    with duckdb.connect(db) as con:
+    run, _ = current_run()
+    db = str(run / "gss.duckdb")
+    with duckdb.connect(db, read_only=True) as con:
         con.execute("set threads=1")
-        model = ROOT / "dbt/target/compiled/gss/models/respondents.sql"
+        model = run / "dbt/compiled/gss/models/respondents.sql"
         con.execute("create temp view baseline_interviews as " + model.read_text(encoding="utf8"))
-        keys = ROOT / "dbt/target/compiled/gss/models/stg_membership.sql"
+        keys = run / "dbt/compiled/gss/models/stg_membership.sql"
         con.execute("create temp view baseline_membership as " + keys.read_text(encoding="utf8"))
         results = []
         for f in sorted((ROOT / "source/sql").glob("*.sql")):
@@ -33,6 +35,7 @@ if __name__ == "__main__":
                 before = before.replace("from respondents", "from baseline_interviews").replace(
                     "join respondents", "join baseline_interviews")
             ms, rows = measure(con, before)
+            assert rows == con.execute(sql).fetchall(), f.name
             results.append((ms, f.name, before, sql, rows))
         ms, name, before, after, rows = max(results, key=lambda result: result[0])
         after_ms, after_rows = measure(con, after)

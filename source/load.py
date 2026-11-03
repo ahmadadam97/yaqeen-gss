@@ -53,9 +53,16 @@ def read_records(content):
     return rows
 
 
-def load(con, paths):
+def load(con, paths, manifest_path=None):
     if not paths:
         raise ValueError("no raw JSON files found")
+    expected = None
+    if manifest_path is not None:
+        with Path(manifest_path).open(encoding="utf8", newline="") as f:
+            entries = list(csv.DictReader(f))
+        expected = {r["filename"]: r for r in entries}
+        if len(expected) != len(entries) or set(expected) != {p.name for p in paths}:
+            raise ValueError("raw files differ from reviewed extract manifest")
     con.execute("begin")
     try:
         con.execute("""create schema if not exists raw;
@@ -69,6 +76,8 @@ def load(con, paths):
         for path in paths:
             content = path.read_bytes()
             digest = hashlib.sha256(content).hexdigest()
+            if expected and digest != expected[path.name]["sha256"]:
+                raise ValueError(f"{path.name}: SHA-256 differs from reviewed extract manifest")
             previous = known.get(path.name)
             if previous and previous != digest:
                 raise ValueError(f"{path.name} has changed; investigate the version")
@@ -78,6 +87,11 @@ def load(con, paths):
                 rows = read_records(content)
             except (ValueError, KeyError, TypeError, AttributeError) as exc:
                 raise ValueError(f"{path.name}: {exc}") from exc
+            if expected:
+                entry = expected[path.name]
+                years = sorted({str(json.loads(r)["year"]) for r in rows})
+                if len(rows) != int(entry["row_count"]) or "|".join(years) != entry["years"]:
+                    raise ValueError(f"{path.name}: row count or years differ from extract manifest")
             if previous == digest:
                 logging.info("validated unchanged %s rows=%d sha256=%s; skip insert", path.name, len(rows), digest)
                 continue

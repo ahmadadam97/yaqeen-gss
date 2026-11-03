@@ -1,4 +1,6 @@
 import json
+import csv
+import hashlib
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
@@ -27,6 +29,31 @@ class LoadTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "codebook drift"):
                     load(con, [raw])
                 self.assertEqual(con.execute("select count(*) from raw.records").fetchone(), (1,))
+
+    def test_reviewed_manifest_rejects_truncation_and_accepts_a_reviewed_revision(self):
+        with TemporaryDirectory(dir=ROOT) as tmp:
+            folder = Path(tmp)
+            raw = folder / "cut.json"
+            manifest = folder / "extracts.csv"
+            def write_answer(answer):
+                raw.write_text(json.dumps({"data":{"year":["2014"],"id_":[1],"postlife":[answer]},"codes":{}}))
+            def review():
+                with manifest.open("w", newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow(["filename","sha256","row_count","years"])
+                    writer.writerow([raw.name, hashlib.sha256(raw.read_bytes()).hexdigest(),1,"2014"])
+            write_answer("YES")
+            review()
+            with duckdb.connect() as con:
+                load(con,[raw],manifest)
+            write_answer("NO")
+            with duckdb.connect() as con:
+                with self.assertRaisesRegex(ValueError,"SHA-256"):
+                    load(con,[raw],manifest)
+            review()
+            with duckdb.connect() as con:
+                load(con,[raw],manifest)
+                self.assertEqual(con.execute("select payload->>'postlife' from raw.records").fetchone(),("NO",))
 
     def test_reject_bad_input(self):
         for content in ['{', '{"data":{"year":[],"year":[]}}',

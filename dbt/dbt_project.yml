@@ -10,4 +10,4 @@ seeds:
     codebook:
       +column_types: {source_code: integer, label: varchar}
     variables:
-      +column_types: {reviewed_years: varchar, min_value: double, max_value: double}
+      +column_types: {reviewed_years: varchar, min_value: double, max_value: double, wide_label: boolean, wide_value: boolean, wide_status: boolean}

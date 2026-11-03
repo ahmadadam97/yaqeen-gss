@@ -1,0 +1,25 @@
+question,definition,subgroup,detail,n,denominator,value
+Q3,Alternative: codes 1-2,Associate/junior college,Hospitals,41,385,10.65
+Q3,Alternative: codes 1-2,Bachelor's,Elementary and secondary schools,94,1002,9.38
+Q3,Alternative: codes 1-2,Graduate,Elementary and secondary schools,81,552,14.67
+Q3,Alternative: codes 1-2,High school,Construction,185,2214,8.36
+Q3,Alternative: codes 1-2,Less than high school,Construction,53,373,14.21
+Q3,Standard: codes 1-3,Associate/junior college,Hospitals,41,398,10.3
+Q3,Standard: codes 1-3,Bachelor's,Elementary and secondary schools,109,1037,10.51
+Q3,Standard: codes 1-3,Graduate,Elementary and secondary schools,94,582,16.15
+Q3,Standard: codes 1-3,High school,Construction,186,2275,8.18
+Q3,Standard: codes 1-3,Less than high school,Construction,53,384,13.8
+Q4,Alternative: codes 1-2,A little dissatisfied,mean TV hours/day,239,239,2.3
+Q4,Alternative: codes 1-2,Moderately satisfied,mean TV hours/day,1059,1059,2.36
+Q4,Alternative: codes 1-2,Very dissatisfied,mean TV hours/day,84,84,2.42
+Q4,Alternative: codes 1-2,Very satisfied,mean TV hours/day,1374,1374,2.3
+Q4,Standard: codes 1-3,A little dissatisfied,mean TV hours/day,251,251,2.39
+Q4,Standard: codes 1-3,Moderately satisfied,mean TV hours/day,1091,1091,2.37
+Q4,Standard: codes 1-3,Very dissatisfied,mean TV hours/day,88,88,2.55
+Q4,Standard: codes 1-3,Very satisfied,mean TV hours/day,1415,1415,2.32
+Q5,Alternative: codes 1-2,Lower bound,all missing assigned no,3184,2726,77.48
+Q5,Alternative: codes 1-2,Observed yes,nonworkers / valid answers,3184,2726,90.5
+Q5,Alternative: codes 1-2,Upper bound,all missing assigned yes,3184,2726,91.87
+Q5,Standard: codes 1-3,Lower bound,all missing assigned no,3034,2726,81.31
+Q5,Standard: codes 1-3,Observed yes,nonworkers / valid answers,3034,2726,90.5
+Q5,Standard: codes 1-3,Upper bound,all missing assigned yes,3034,2726,91.46

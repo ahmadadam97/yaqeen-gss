@@ -11,19 +11,29 @@ with raw_answers as (
     -- Two uncodeable industry codes have the same label. Neither identifies an industry.
     select variable, label, kind, case when count(*) = 1 then min(source_code) end as source_code
     from {{ ref('codebook') }} group by all
+), context as (
+    select r.survey_year, r.respondent_id,
+           max(c.source_code) filter (where r.variable='ballot') as ballot_code,
+           max(c.source_code) filter (where r.variable='form') as form_code
+    from raw_answers r left join lookup c on c.variable=r.variable and c.label=r.raw_label
+    group by r.survey_year,r.respondent_id
 ), decoded as (
-    select i.*, v.variable, r.raw_label, c.source_code, c.kind as code_kind, v.kind,
+    select i.*, e.is_eligible, v.variable, r.raw_label, c.source_code, c.kind as code_kind, v.kind,
            v.min_value, v.max_value, v.reviewed_years,
            r.variable is not null as present,
            coalesce(c.source_code::double, try_cast(r.raw_label as double)) as candidate_value
     from interviews i cross join {{ ref('variables') }} v
     left join raw_answers r using (survey_year, respondent_id, variable)
     left join lookup c on c.variable=v.variable and c.label=r.raw_label
+    left join context x using (survey_year,respondent_id)
+    left join {{ ref('eligibility') }} e on e.variable=v.variable and e.survey_year=i.survey_year
+        and e.ballot_code=x.ballot_code and e.form_code=x.form_code
 ), classified as (
     select *, case
         when not list_contains(string_split(reviewed_years, '|'), survey_year::varchar) then 'unreviewed_year'
         when not present then 'absent_field'
         when raw_label is null then 'unspecified_missing'
+        when code_kind='inapplicable' and is_eligible is false then 'not_asked_ballot'
         when code_kind is not null and code_kind <> 'answer' then code_kind
         when kind = 'category' then coalesce(code_kind, 'unknown_code')
         when not isfinite(candidate_value) or candidate_value is null
@@ -33,7 +43,7 @@ with raw_answers as (
         else 'answer' end as status
     from decoded
 )
-select survey_year, respondent_id, variable, raw_label, source_code, status,
+select survey_year, respondent_id, variable, raw_label, source_code, code_kind as source_status, is_eligible, status,
        case when status='answer' then raw_label end as answer_label,
        case when status='answer' then candidate_value end as answer_value
 from classified

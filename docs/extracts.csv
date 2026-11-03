@@ -1,0 +1,3 @@
+filename,sha256,row_count,years,export_settings
+yaqeen_cut_a_2014_2016.json,cde0398f3882f45028b93523e98d66f969cdef21f727f97b4ca9b509a6f5976f,5405,2014|2016,Independent GSS Explorer cut; all 32 listed variables; no case filters; JSON post_processing_output.json; original bytes
+yaqeen_cut_b_2016_2018.json,46ef44eb95319098e7990e41cf470738fd0f8c22193e1aabde2bf97ae9fe6e7b,5215,2016|2018,Independent GSS Explorer cut; all 32 listed variables; no case filters; JSON post_processing_output.json; original bytes
