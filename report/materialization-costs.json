@@ -1,0 +1,70 @@
+{
+  "run_id": "5ca0f74824894769919e3099d24e825d",
+  "inputs": [
+    {
+      "filename": "yaqeen_cut_a_2014_2016.json",
+      "sha256": "cde0398f3882f45028b93523e98d66f969cdef21f727f97b4ca9b509a6f5976f",
+      "row_count": 5405
+    },
+    {
+      "filename": "yaqeen_cut_b_2016_2018.json",
+      "sha256": "46ef44eb95319098e7990e41cf470738fd0f8c22193e1aabde2bf97ae9fe6e7b",
+      "row_count": 5215
+    }
+  ],
+  "model_hashes": {
+    "dbt/models/answers.sql": "d197c57b6acd58e93d029bfaf21ebe302b83ab7f496f9630cadde5270a9e422b",
+    "dbt/models/respondents.sql": "a43f643fad107845cbc38c10f1dc29755b44840163f8021cfa3aa72d50ffcb70",
+    "dbt/models/stg_membership.sql": "bf04ea40cfdca40cb908bcb80265d8fbfbf0c7f1b5b1277e99cb3c0af927d284",
+    "dbt/tests/answer_grain.sql": "c7018afe563a050d29260d7e8657c4de5bffa598723d80fa041207c2192cea4b",
+    "dbt/tests/interview_grain.sql": "b72d3e054bd8d7641d53f9198390fcb37fd76387468422cbc83bd3ba2591d51f",
+    "dbt/tests/invalid_answers.sql": "9e05cc447ce8f64ed221a6186b6b776c8eefe114204d6e746873ab446b53910e",
+    "dbt/tests/metadata_contract.sql": "fc5c0195342873433207a23a63c64d03c960d8e16f66b9fbef2436f40fb0c61f",
+    "dbt/tests/missing_semantics.sql": "2a034097857496a5cf094195666336db41eaa15edfeb1fde228fba1cf9607105",
+    "dbt/tests/survey_routing.sql": "51333018185b5f080348f1173dfec5ff0a3826f1d83613801bb85a50c28d4b76",
+    "dbt/seeds/codebook.csv": "8d6c5747ddbf04e559524373f698a48fd293d24667160ad7a08293a11019b3eb",
+    "dbt/seeds/eligibility.csv": "0206ba7146c4e94ccd73d6f7b11054afae4193956dcf50edb3bae519aa75a30a",
+    "dbt/seeds/variables.csv": "282ad49c298974276c6046613c49e03eaef189a62986b99cdf8c53cd1cb20209",
+    "dbt/seeds/work_status.csv": "31bd62ffc73a982e81737cace173bdd213fa4cf3ddf5fa571a9bc6f14d36c46b"
+  },
+  "query_hashes": {
+    "source/sql/01_prayer.sql": "38f4ab20c85eb9547dcd3374bce4ad7b2f2fafbcf3cb7bcd93808118748c7cb0",
+    "source/sql/02_afterlife.sql": "285baa1e16e16aa486dd030943ac4ddf9bbcb81b4653847643e63991a9ac1826",
+    "source/sql/03_industry.sql": "014c0bf51de5472ecfdf9d8cbffb40f6219e78aa105a9ea47fb0319777e715d0",
+    "source/sql/04_tv_satisfaction.sql": "e423e0a892ddc750a7ac4ba7ad1a34a33fad5cd297fcca6dd21686711193348d",
+    "source/sql/05_ever_work.sql": "b41836271f7dd2ca2ee54e11bec143cb951764a9484debafe1300fa5dfda6068",
+    "source/sql/06_wave_changes.sql": "90066c84cde4788e8a314c8dc37e7fe1262d50c60450b72cc616c258f30ed518",
+    "source/sql/07_overlap.sql": "5ef208a998f42abf83fc146159506e1e23d2cb8292b20959f9dd29d389a11b6a",
+    "source/sql/08_technology_interest.sql": "8da337efe3a0fedf499d15def3c060c376cfb96bf592f4c46c6a7fb05a4c3bd8",
+    "source/sql/09_ballot_coverage.sql": "a022d0d504ff3a78e9ae164bca77ea9cac849d4d11a028b44527a1361af574ca",
+    "source/sql/10_prayer_afterlife.sql": "567da018002745c1d1e15cc2c29a217fe08c979f03275f4af3c7a08ff61a30b1",
+    "source/sql/11_media_by_age.sql": "dfa8721ed7b828cfda3bb45d6b9b1e1b4e83b31066d98752d9e6f14a21b0b605",
+    "source/sql/12_report_summary.sql": "2348a4e01475f4c39cc9445ee967cdbb895568364aa97477c14b71d9da66131a",
+    "source/sql/13_web_sensitivity.sql": "f3df61dafb4a476bf7ac840848891fb107875c1cd12e73827dfce1fb3c9809e8",
+    "source/sql/14_work_status_sensitivity.sql": "786456c79e4069da311da8a2fc9107c000bf334f3458b86cb1a4e5da510f4c56"
+  },
+  "slowest_query": "14_work_status_sensitivity.sql",
+  "changed_model": "respondents",
+  "before_ms": 100.88340000947937,
+  "after_ms": 15.60139999492094,
+  "equal_result_rows": 24,
+  "break_even_reads": 2,
+  "materialization": {
+    "stg_membership": {
+      "build_ms": 30.6542000034824,
+      "incremental_storage_bytes": 262144,
+      "rows": 10620
+    },
+    "answers": {
+      "build_ms": 505.13239996507764,
+      "incremental_storage_bytes": 3145728,
+      "rows": 232590
+    },
+    "respondents": {
+      "build_ms": 143.01409997278824,
+      "incremental_storage_bytes": 524288,
+      "rows": 7753
+    }
+  },
+  "method": "One thread. Read medians: 3 warm runs after 1 warm-up. Build medians: 3 fresh isolated databases, CTAS plus checkpoint. Dependencies remain materialized in the read-only source. Storage is the incremental file size over the same model as a view. Excludes dbt process startup, upstream storage, and monetary storage cost."
+}

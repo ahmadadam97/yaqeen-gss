@@ -38,4 +38,10 @@ WTSSPS is the primary point-estimate convention here, following the FAQ. WTSSNRP
 - Database and CSV hashes detect changes in published outputs. A manifest establishes provenance for the reviewed export, not independent truth about the source system.
 - Ballot/form metadata is scoped to these reviewed waves. New wording, sources or waves require a fresh eligibility review.
 - VSTRAT/VPSU are still absent from the committed extracts, so population-level standard errors remain future work.
-- Query timings measure reads. Table-building and storage costs must be considered before generalising the optimization.
+- The benchmark measures incremental table build time, checkpoint and storage against a view. Its break-even estimate applies to repeated reads of the measured query; it excludes dbt startup, upstream table costs and monetary storage cost.
+
+## Follow-up review fixes
+
+- **A/B population:** Q7 filters memberships and its respondent grain check to the required A/B pair. A third-cut regression includes one shared and one new interview; a duplicate in the pair still fails the grain check. Global uniqueness remains a separate dbt test.
+- **Report freshness:** the temporary-absence count is published by SQL 12, and the newspaper standard-error distance is read from SQL 06. A renderer regression changed both values in a disposable publication and verified the PDF followed them.
+- **Materialization cost:** the benchmark uses three isolated databases per model, measuring CTAS plus checkpoint and file growth relative to a view. It publishes machine-readable evidence, checks equal query results, and records break-even reads for the table that changed in the selected comparison. Inputs, dbt models/seeds/macros and query hashes bind the evidence to the publication. No orchestration or infrastructure was added.

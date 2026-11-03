@@ -1,7 +1,11 @@
 Slowest baseline: 14_work_status_sensitivity.sql
-Single thread, median of 3 warm runs; durations include fetching rows.
-Baseline ms: 01_prayer.sql 22.97, 02_afterlife.sql 19.38, 03_industry.sql 19.74, 04_tv_satisfaction.sql 18.41, 05_ever_work.sql 18.56, 06_wave_changes.sql 24.11, 07_overlap.sql 31.93, 08_technology_interest.sql 35.63, 09_ballot_coverage.sql 25.15, 10_prayer_afterlife.sql 25.63, 11_media_by_age.sql 25.94, 12_report_summary.sql 30.74, 13_web_sensitivity.sql 22.01, 14_work_status_sensitivity.sql 139.39
-Before: 139.39 ms; after: 29.39 ms; equal result rows: 24.
+One thread. Read medians: 3 warm runs after 1 warm-up. Build medians: 3 fresh isolated databases, CTAS plus checkpoint. Dependencies remain materialized in the read-only source. Storage is the incremental file size over the same model as a view. Excludes dbt process startup, upstream storage, and monetary storage cost.
+Baseline ms: 01_prayer.sql 22.95, 02_afterlife.sql 15.53, 03_industry.sql 18.18, 04_tv_satisfaction.sql 14.88, 05_ever_work.sql 13.77, 06_wave_changes.sql 16.65, 07_overlap.sql 25.74, 08_technology_interest.sql 27.73, 09_ballot_coverage.sql 21.46, 10_prayer_afterlife.sql 21.92, 11_media_by_age.sql 20.46, 12_report_summary.sql 33.93, 13_web_sensitivity.sql 20.03, 14_work_status_sensitivity.sql 100.88
+Before: 100.88 ms; after: 15.60 ms; equal result rows: 24.
+stg_membership: build 30.65 ms; incremental storage 262144 bytes; rows 10620.
+answers: build 505.13 ms; incremental storage 3145728 bytes; rows 232590.
+respondents: build 143.01 ms; incremental storage 524288 bytes; rows 7753.
+Break-even for respondents and 14_work_status_sensitivity.sql: 2 repeated reads per rebuild.
 BEFORE
 ┌─────────────────────────────────────┐
 │┌───────────────────────────────────┐│
@@ -11,7 +15,7 @@ BEFORE
 explain analyze -- Reclassify temporarily absent workers only as a sensitivity alternative. with classified as (     select r.*, d.definition,            case when d.definition='Standard: codes 1-3' then wrkstat_value between 1 and 3                 else wrkstat_value between 1 and 2 end as working     from baseline_interviews r cross join (values ('Standard: codes 1-3'), ('Alternative: codes 1-2')) d(definition) ), industry as (     select definition, degree as subgroup, indus10 as detail, count(*) as n,            sum(count(*)) over (partition by definition,degree) as denominator,            dense_rank() over (partition by definition,degree order by count(*) desc) as position     from classified where working and degree is not null and indus10 is not null group by definition,degree,indus10 ), tv as (     select definition, satjob as subgroup, count(*) as n, avg(tvhours_value) as value     from classified where working and satjob is not null and tvhours_value is not null group by all ), history as (     select definition, count(*) as n, count(evwork) as denominator,            count(*) filter (where evwork='YES') as yes_n,            count(*)-count(evwork) as missing_n from classified where working=false group by definition ) select 'Q3' as question, definition, subgroup, detail, n, denominator,        round(100.0*n/denominator,2) as value from industry where position=1 union all select 'Q4', definition, subgroup, 'mean TV hours/day', n, n, round(value,2) from tv union all select 'Q5', definition, 'Observed yes', 'nonworkers / valid answers', n, denominator,        round(100.0*yes_n/nullif(denominator,0),2) from history union all select 'Q5', definition, 'Lower bound', 'all missing assigned no', n, denominator,        round(100.0*yes_n/nullif(n,0),2) from history union all select 'Q5', definition, 'Upper bound', 'all missing assigned yes', n, denominator,        round(100.0*(yes_n+missing_n)/nullif(n,0),2) from history order by question,definition,subgroup,detail
 ┌────────────────────────────────────────────────┐
 │┌──────────────────────────────────────────────┐│
-││              Total Time: 0.165s              ││
+││              Total Time: 0.111s              ││
 │└──────────────────────────────────────────────┘│
 └────────────────────────────────────────────────┘
 ┌───────────────────────┐
@@ -32,7 +36,7 @@ explain analyze -- Reclassify temporarily absent workers only as a sensitivity a
 │     Table Index: 0    │                                                              │
 │                       │                                                              │
 │         0 rows        │                                                              │
-│        (0.01s)        │                                                              │
+│        (0.00s)        │                                                              │
 └───────────┬───────────┘                                                              │
 ┌───────────┴───────────┐                                                  ┌───────────┴───────────┐
 │       PROJECTION      │                                                  │          CTE          │
@@ -277,7 +281,7 @@ explain analyze -- Reclassify temporarily absent workers only as a sensitivity a
 │      count_star()     │                                                  │                       ││                       │                                                              │            │                       │
 │                       │                                                  │                       ││                       │                                                              │            │                       │
 │       7,753 rows      │                                                  │       6,218 rows      ││         0 rows        │                                                              │            │         2 rows        │
-│        (0.08s)        │                                                  │        (0.00s)        ││        (0.00s)        │                                                              │            │        (0.00s)        │
+│        (0.06s)        │                                                  │        (0.00s)        ││        (0.00s)        │                                                              │            │        (0.00s)        │
 └───────────┬───────────┘                                                  └───────────┬───────────┘└───────────┬───────────┘                                                              │            └───────────┬───────────┘
 ┌───────────┴───────────┐                                                  ┌───────────┴───────────┐┌───────────┴───────────┐                                                  ┌───────────┴───────────┐┌───────────┴───────────┐
 │       PROJECTION      │                                                  │        CTE_SCAN       ││         UNION         │                                                  │       PROJECTION      ││        CTE_SCAN       │
@@ -465,7 +469,6 @@ explain analyze -- Reclassify temporarily absent workers only as a sensitivity a
                                                                                                     │      15,456 rows      │
                                                                                                     │        (0.00s)        │
                                                                                                     └───────────────────────┘
-
 AFTER
 ┌─────────────────────────────────────┐
 │┌───────────────────────────────────┐│
@@ -475,7 +478,7 @@ AFTER
 explain analyze -- Reclassify temporarily absent workers only as a sensitivity alternative. with classified as (     select r.*, d.definition,            case when d.definition='Standard: codes 1-3' then wrkstat_value between 1 and 3                 else wrkstat_value between 1 and 2 end as working     from respondents r cross join (values ('Standard: codes 1-3'), ('Alternative: codes 1-2')) d(definition) ), industry as (     select definition, degree as subgroup, indus10 as detail, count(*) as n,            sum(count(*)) over (partition by definition,degree) as denominator,            dense_rank() over (partition by definition,degree order by count(*) desc) as position     from classified where working and degree is not null and indus10 is not null group by definition,degree,indus10 ), tv as (     select definition, satjob as subgroup, count(*) as n, avg(tvhours_value) as value     from classified where working and satjob is not null and tvhours_value is not null group by all ), history as (     select definition, count(*) as n, count(evwork) as denominator,            count(*) filter (where evwork='YES') as yes_n,            count(*)-count(evwork) as missing_n from classified where working=false group by definition ) select 'Q3' as question, definition, subgroup, detail, n, denominator,        round(100.0*n/denominator,2) as value from industry where position=1 union all select 'Q4', definition, subgroup, 'mean TV hours/day', n, n, round(value,2) from tv union all select 'Q5', definition, 'Observed yes', 'nonworkers / valid answers', n, denominator,        round(100.0*yes_n/nullif(denominator,0),2) from history union all select 'Q5', definition, 'Lower bound', 'all missing assigned no', n, denominator,        round(100.0*yes_n/nullif(n,0),2) from history union all select 'Q5', definition, 'Upper bound', 'all missing assigned yes', n, denominator,        round(100.0*(yes_n+missing_n)/nullif(n,0),2) from history order by question,definition,subgroup,detail
 ┌────────────────────────────────────────────────┐
 │┌──────────────────────────────────────────────┐│
-││              Total Time: 0.0306s             ││
+││              Total Time: 0.0210s             ││
 │└──────────────────────────────────────────────┘│
 └────────────────────────────────────────────────┘
 ┌───────────────────────────┐
@@ -494,7 +497,7 @@ explain analyze -- Reclassify temporarily absent workers only as a sensitivity a
 │       Table Index: 0      ├───────────────────────────────────────────┐
 │                           │                                           │
 │           0 rows          │                                           │
-│          (0.01s)          │                                           │
+│          (0.00s)          │                                           │
 └─────────────┬─────────────┘                                           │
 ┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
 │         PROJECTION        │                             │            CTE            │

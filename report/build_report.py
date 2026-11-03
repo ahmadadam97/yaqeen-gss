@@ -1,7 +1,7 @@
 """Render the assessment from a successful pipeline run. Optional dependencies: see README."""
 import csv
 import os
-import re
+import json
 from io import BytesIO
 from pathlib import Path
 
@@ -67,6 +67,12 @@ def decision(y,label,body):
     para(53,y+32,body,505,9.6,12)
 
 o=rows("07_overlap")[0]; waves=rows("02_afterlife"); change=rows("06_wave_changes")
+summary=rows("12_report_summary")[0]
+absent_n=num(summary["temporarily_absent_n"])
+first_change=next((row for row in change if row["news_z"]),None)
+news_error_note=(f"The first news change is {abs(float(first_change['news_z'])):.2f} approximate standard errors from zero."
+                 if first_change else "No wave-to-wave news comparison is available.")
+
 page(0,"Counting the right interviews","Two overlapping extracts, three survey waves and one decision that governs every result: who was actually in a position to answer?")
 txt(42,242,num(o["distinct_n"]),57,"Times-Bold",teal)
 txt(246,218,"distinct survey interviews",18,"Times-Bold")
@@ -107,7 +113,7 @@ section(460,"Question map   /   fields and eligibility")
 mapping=[
 ("Work and history","WRKSTAT includes temporary absence as working. EVWORK asks about at least one year. Current workers and job seekers skipped it, so their lifetime duration is unknown. Q5 bounds the missing answers."),
 ("Education and industry","DEGREE measures credentials; EDUC measures years. Use INDUS10 for current workers so a prior industry's label is not mistaken for a current job."),
-("Satisfaction and media","In 2016, Ballot A/Form Y used alternate work-satisfaction wording. Q4 keeps only standard SATJOB. Code 3 keeps temporarily absent workers employed. Reclassifying its 150 cases changes Q3-Q5 samples (CSV 14). TVHOURS measures daily duration."),
+("Satisfaction and media",f"In 2016, Ballot A/Form Y used alternate work-satisfaction wording. Q4 keeps only standard SATJOB. Code 3 keeps temporarily absent workers employed. Reclassifying its {absent_n} cases changes Q3-Q5 samples (CSV 14). TVHOURS measures daily duration."),
 ("Faith and technology","RELIG16 is upbringing, RELIG current preference, ATTEND attendance, RELITEN strength. PRAY is ordered frequency; POSTLIFE is belief. INTTECH is interest, not usage."),
 ("Web duration","WWWHR + WWWMIN / 60 measures weekly non-email web time. Require both fields. A skip is unknown. Age, sex, region, ballot, form and mode retain context.")]
 for i,(label,body) in enumerate(mapping):
@@ -142,7 +148,7 @@ para(42,507,f"Of {num(working)} workers, {num(satisfied)}/{num(valid)} who answe
 section(567,"05  Ever worked at least one year")
 para(42,587,f"Of {num(hist['nonworking_n'])} nonworkers, {hist['job_seekers_routed_out_n']} job seekers were skipped and {hist['eligible_missing_n']} eligible answers missing. Yes: {num(hist['yes_n'])}/{num(hist['valid_n'])} ({hist['yes_pct_of_valid']}%). Across all nonworkers the possible range is {hist['lower_bound_pct']}-{hist['upper_bound_pct']}%.")
 section(646,"06  News and TV across waves")
-para(42,666,"Daily readership: "+" / ".join(f"{float(w['daily_news_pct']):.1f}%" for w in change)+". Mean TV hours: "+" / ".join(w["mean_tv_hours"] for w in change)+". The first news drop is 2.67 approximate standard errors. Errors omit survey design and multiplicity. Weighted, design-based results could change this assessment.")
+para(42,666,"Daily readership: "+" / ".join(f"{float(w['daily_news_pct']):.1f}%" for w in change)+". Mean TV hours: "+" / ".join(w["mean_tv_hours"] for w in change)+". "+news_error_note+" Errors omit survey design and multiplicity. Weighted, design-based results could change this assessment.")
 txt(42,729,"Q7   /   See Sample for the overlap audit. Detailed counts: report/results/01-07.",9,"Helvetica-Bold",teal)
 c.showPage()
 
@@ -157,12 +163,19 @@ for y,tag,body in [
 (459,"RERUN  /  VALIDATE AGAIN","Validate reviewed input hashes and counts before building each candidate. A fresh candidate and its input/output manifest must pass dbt and SQL before LATEST is replaced. The prior publication survives a failure. CI uses the same checks."),
 (522,"SCALE  /  CHANGE ONLY WHEN NEEDED","DuckDB avoids a server for two periodic extracts. At full scale the dense model approaches 530 million cells. Read only needed fields and rebuild affected waves before adding managed compute.")]:
     decision(y,tag,body)
-plan=(ROOT/"report/query-plans.txt").read_text(encoding="utf8")
-before,after=map(float,re.search(r"Before: ([\d.]+) ms; after: ([\d.]+) ms",plan).groups())
-section(606,"Work-status sensitivity   /   runtime")
+benchmark=json.loads((ROOT/"report/materialization-costs.json").read_text(encoding="utf8"))
+if benchmark["inputs"] != MANIFEST["inputs"] or any(MANIFEST["definitions"].get(name) != value for name,value in (benchmark["model_hashes"] | benchmark["query_hashes"]).items()):
+    raise ValueError("Benchmark belongs to different inputs or models; rerun source/benchmark.py")
+before,after=benchmark["before_ms"],benchmark["after_ms"]
+section(606,benchmark["slowest_query"].split("_",1)[1].removesuffix(".sql").replace("_"," ").capitalize()+"   /   runtime")
 for j,(label,v) in enumerate([("Before",before),("After",after)]):
     y=627+17*j;txt(42,y,label,9);bar(103,y-7,170,v,before);txt(281,y,f"{v:.2f} ms",9,"Helvetica-Bold")
-para(367,625,"Median of three warm runs, one thread. Each candidate rebuilds from reviewed extracts. Tables and outputs publish together.",201,9,12,muted)
+cost=benchmark["materialization"][benchmark["changed_model"]]
+reads=benchmark["break_even_reads"]
+cost_note=(f"Build {cost['build_ms']:.1f} ms; extra storage {cost['incremental_storage_bytes']/1024:.0f} KiB. "
+           + (f"Cost recovered after {reads} reads per rebuild." if reads is not None else "No measured read-time saving.")
+           + " Excludes dbt startup and upstream tables.")
+para(367,625,cost_note,201,8.8,11,muted)
 para(42,678,"Oversight and effort: I spent roughly six hours choosing extracts, discussing tradeoffs and reviewing the work. I supplied both cuts and challenged the TV and employment interpretations. Codex wrote the code and SQL, ran checks and helped write the report; an AI reviewer challenged the scope. For population claims I would next add survey strata and sampling units.",526,9.6,13)
 c.showPage()
 

@@ -72,7 +72,7 @@ eligibility.csv expresses the reviewed year/ballot/form availability for split i
 
 After the pipeline succeeds, install optional `reportlab==4.4.9` and `pypdf==6.10.0`, then run `python report/build_report.py` in that environment. The renderer verifies the selected publication and reads all statistics from its CSVs. It has no database-query path. Tabs link pages and the Research page switches survey weights in supporting viewers.
 
-Run `python source/benchmark.py` to compare the current run's compiled-view baselines with its tables. It verifies equal rows for every query and writes plans for the slowest one to report/query-plans.txt. Durations include fetching and exclude the materialization/build cost. Machine timings vary.
+Run `python source/benchmark.py` to compare the current run's compiled-view baselines with its tables. It verifies equal rows for every query and writes plans for the slowest one to report/query-plans.txt. Read durations include fetching. The same command measures each model's CTAS plus checkpoint time in three fresh scratch databases and its incremental file storage over a view. It records report/materialization-costs.json and verifies that its input, model and query definitions match the selected publication. For the slowest query, break-even reads = ceiling(build milliseconds / saved milliseconds per read). Upstream tables and dbt process startup are outside that incremental comparison. Machine timings vary.
 
 ## Bonuses and CI
 

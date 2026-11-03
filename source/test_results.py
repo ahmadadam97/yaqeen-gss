@@ -73,6 +73,32 @@ class ResultsTests(unittest.TestCase):
             self.assertEqual(media[0][2:], (3,3,2,2,66.67,50,5))
             self.assertEqual(media[1][-3:], (0,None,None))
 
+    def test_pair_overlap_stays_scoped_when_a_third_cut_is_added(self):
+        with duckdb.connect() as con:
+            con.execute("""create table stg_membership as select * from (values
+                ('yaqeen_cut_a_2014_2016.json',2014,1),('yaqeen_cut_a_2014_2016.json',2016,2),
+                ('yaqeen_cut_b_2016_2018.json',2016,2),('yaqeen_cut_b_2016_2018.json',2018,1),
+                ('third.json',2016,2),('third.json',2018,9))
+                m(filename,survey_year,respondent_id)""")
+            con.execute("""create table respondents as
+                select distinct survey_year,respondent_id from stg_membership""")
+            sql = (ROOT / "source/sql/07_overlap.sql").read_text()
+            row = con.execute(sql).fetchone()
+            self.assertEqual(row, (2,2,1,3,3,3,2,50,50,0,1))
+            con.execute("insert into respondents values (2016,2)")
+            row = con.execute(sql).fetchone()
+            self.assertEqual((row[4],row[5],row[9]), (4,3,1))
+
+    def test_report_summary_recomputes_temporary_absence_count(self):
+        with duckdb.connect() as con:
+            con.execute("""create table respondents as select * from (values
+                (3,true,'Very satisfied',2),(1,true,'Very satisfied',2),(4,false,null,null))
+                r(wrkstat_value,is_working,satjob,tvhours_value)""")
+            sql = (ROOT / "source/sql/12_report_summary.sql").read_text()
+            self.assertEqual(con.execute(sql).fetchone(), (1,2,2,2,0))
+            con.execute("insert into respondents values (3,true,'Very satisfied',2)")
+            self.assertEqual(con.execute(sql).fetchone(), (2,3,3,3,0))
+
     def test_zero_coverage_wave_is_visible(self):
         with duckdb.connect() as con:
             con.execute("""create table respondents as
