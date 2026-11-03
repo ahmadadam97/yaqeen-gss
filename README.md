@@ -14,7 +14,7 @@ py -3.12 -m venv .env
 .env\Scripts\python.exe source/run.py
 ```
 
-On macOS or Linux, use `python3.12 -m venv .env` and substitute `.env/bin/python`. The pinned requirements.lock contains wheel hashes verified against PyPI release metadata. requirements.txt lists the same versions in readable form. No cloud resources or credentials are required.
+On macOS or Linux, use `python3.12 -m venv .env` and substitute `.env/bin/python`. The pinned requirements.lock contains wheel hashes verified against PyPI release metadata. No cloud resources or credentials are required.
 
 ## One complete publication
 
@@ -52,7 +52,7 @@ The low-level load() function still supports transactional incremental inserts f
 | docs/profile.md and profile.csv | Original pre-build profile for all 96 variable/year combinations |
 | docs/extracts.csv | Reviewed source manifest |
 | docs/design.md and naming.md | Initial design, current divergence and conventions |
-| docs/review-response.md | Accepted/rejected feedback, source definitions, evidence and limitations |
+| docs/analyst-guide.md | Analytical definitions, weighting and interpretation |
 | source/load.py, run.py and snapshot.py | Ingestion, candidate orchestration and verified reader |
 | dbt/seeds | Codebook, variable domains/projections, ballot/form eligibility and work-status definitions |
 | dbt/models and tests | Membership, canonical answers, wide respondents and data expectations |
