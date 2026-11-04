@@ -1,20 +1,7 @@
 version: 2
-sources:
-  - name: raw
-    schema: raw
-    tables:
-      - name: records
-        description: One immutable source observation per filename and row ordinal.
 models:
-  - name: stg_membership
-    description: Source membership, including one copy in each overlapping cut.
-    columns:
-      - {name: filename, description: Committed JSON basename in the file manifest.}
-      - {name: ordinal, description: One-based source row position.}
-      - {name: survey_year, description: Cross-sectional GSS wave.}
-      - {name: respondent_id, description: ID within this wave.}
   - name: answers
-    description: One row per interview and catalogued variable. Use status before aggregating.
+    description: One row per interview and catalogued variable. Use status before aggregating. A new variable arrives here through the seeds alone.
     columns:
       - {name: survey_year, description: Interview wave.}
       - {name: respondent_id, description: Within-wave respondent ID.}
@@ -23,11 +10,17 @@ models:
       - {name: source_code, description: Code mapped from an unambiguous label when supplied.}
       - {name: source_status, description: Missing or answer kind from the original codebook.}
       - {name: is_eligible, description: Reviewed ballot/form eligibility; null where no split rule applies.}
-      - {name: status, description: Meaning of the response or reason it is unavailable.}
+      - name: status
+        description: "Meaning of the response or reason it is unavailable. Only the value answer is a genuine answer."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [answer, inapplicable, not_asked_ballot, not_asked_year, dont_know, no_answer, skipped_web, refused, uncodable, reserved, unavailable_release, no_job, not_applicable_or_imputable, not_imputable, missing_birthdate, mixed_missing, absent_field, unspecified_missing]
       - {name: answer_label, description: Readable response for genuine answers only.}
       - {name: answer_value, description: Measured value or categorical code. Average only quantitative measures.}
   - name: respondents
-    description: One row per (survey_year, respondent_id) across all extracts.
+    description: One row per (survey_year, respondent_id) across all extracts. A null here means no genuine answer; answers.status holds the reason.
     columns:
       - {name: survey_year, description: "Interview year."}
       - {name: respondent_id, description: "Respondent ID within year."}
@@ -54,17 +47,14 @@ models:
       - {name: tvhours_value, description: "Reported television hours per day."}
       - {name: wwwhr_value, description: "Whole weekly hours on the web excluding email."}
       - {name: wwwmin_value, description: "Additional weekly web minutes."}
-      - {name: wtssps_value, description: "Person poststratification weight."}
-      - {name: wtssnrps_value, description: "Nonresponse-adjusted person weight."}
+      - {name: wtssps_value, description: "Person poststratification weight. The primary weight in every analysis."}
+      - {name: wtssnrps_value, description: "Nonresponse-adjusted person weight, used as a sensitivity check."}
       - {name: wrkstat_value, description: "Original numeric labor force category."}
       - {name: pray_value, description: "Ordered frequency code. Lower means more frequent."}
+      - {name: satjob_value, description: "Ordered satisfaction code. Lower means more satisfied."}
       - {name: postlife_status, description: "Response classification for the afterlife question."}
+      - {name: catalogued_items, description: "Variables catalogued for this interview. Equal to the row count of variables.csv."}
       - {name: is_working, description: "Full-time or part-time employment or temporarily absent from a job."}
       - {name: ever_work_eligible, description: "Work status codes 5 through 8 routed to EVWORK."}
+      - {name: satjob_eligible, description: "Work status codes routed to SATJOB, which includes job seekers and homemakers."}
       - {name: web_hours_weekly, description: "Hours plus fractional minutes when both components are observed."}
-
-seeds:
-  - name: eligibility
-    description: Reviewed item availability by wave and numeric ballot/form codes. Inapplicable labels outside the reviewed combinations become not_asked_ballot.
-  - name: work_status
-    description: Codebook-based employment and EVWORK eligibility flags.

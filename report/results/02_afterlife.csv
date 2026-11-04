@@ -1,4 +1,4 @@
-survey_year,interviews,valid_n,yes_n,yes_pct,not_asked_year_n,inapplicable_n,dont_know_n,no_answer_n
-2014,2538,2242,1783,79.53,0,0,291,5
-2016,2867,2588,2089,80.72,0,0,271,8
-2018,2348,2123,1720,81.02,0,0,216,9
+survey_year,interviews,valid_n,yes_n,yes_pct,wtssps_yes_pct,not_asked_year_n,not_asked_ballot_n,inapplicable_n,dont_know_n,no_answer_n
+2014,2538,2242,1783,79.53,79.11,0,0,0,291,5
+2016,2867,2588,2089,80.72,79.76,0,0,0,271,8
+2018,2348,2123,1720,81.02,80.61,0,0,0,216,9

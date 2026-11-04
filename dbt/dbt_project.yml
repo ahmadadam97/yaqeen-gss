@@ -4,10 +4,16 @@ config-version: 2
 profile: gss
 models:
   gss:
-    +materialized: table
+    staging:
+      +schema: staging
+      +materialized: view
+    marts:
+      +schema: marts
+      +materialized: table
 seeds:
   gss:
+    +schema: metadata
     codebook:
       +column_types: {source_code: integer, label: varchar}
     variables:
-      +column_types: {reviewed_years: varchar, min_value: double, max_value: double, wide_label: boolean, wide_value: boolean, wide_status: boolean}
+      +column_types: {reviewed_years: varchar, min_value: double, max_value: double, wide_label: boolean, wide_value: boolean, wide_status: boolean, min_valid_pct: double}

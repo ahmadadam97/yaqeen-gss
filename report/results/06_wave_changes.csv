@@ -1,4 +1,4 @@
-survey_year,news_n,tv_n,daily_news_pct,news_change_pp,news_change_se_pp,news_z,mean_tv_hours,tv_change_hours,tv_change_se_hours,tv_z
-2014,1675,1669,24.9,,,,2.98,,,
-2016,1885,1883,21.11,-3.78,1.41,-2.67,3.03,0.05,0.091,0.54
-2018,1559,1555,20.01,-1.1,1.38,-0.8,2.94,-0.09,0.097,-0.96
+survey_year,news_n,tv_n,daily_news_pct,news_change_pp,news_change_se_pp,news_z,never_news_pct,mean_tv_hours,tv_change_hours,tv_change_se_hours,tv_z,wtssps_daily_news_pct,wtssps_news_change_pp,wtssps_news_change_se_pp,wtssps_news_z,wtssps_never_news_pct,wtssps_never_change_pp,wtssps_never_z,wtssps_mean_tv_hours,wtssps_tv_change_hours,wtssps_tv_change_se_hours,wtssps_tv_z
+2014,1675,1669,24.9,,,,28.72,2.98,,,,23.71,,,,30.28,,,2.85,,,
+2016,1885,1883,21.11,-3.78,1.41,-2.67,36.5,3.03,0.05,0.091,0.54,20.92,-2.79,1.66,-1.68,37.85,7.57,4.01,2.78,-0.07,0.099,-0.73
+2018,1559,1555,20.01,-1.1,1.38,-0.8,43.49,2.94,-0.09,0.097,-0.96,18.1,-2.81,1.7,-1.66,44.71,6.85,3.24,2.74,-0.03,0.114,-0.28

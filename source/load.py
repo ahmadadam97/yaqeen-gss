@@ -102,8 +102,15 @@ def load(con, paths, manifest_path=None):
                         [path.name, "[" + ",".join(rows) + "]"])
             logging.info("staged %s rows=%d sha256=%s", path.name, len(rows), digest)
             known[path.name] = digest
-        conflict = con.execute("""select payload->>'year' as yr, payload->>'id_' as id, field.key
-            from raw.records, lateral json_each(payload) field
+        # Only an interview held by more than one file can conflict, so unpack only those rows.
+        conflict = con.execute("""with shared as (
+                select payload->>'year' as yr, payload->>'id_' as id
+                from raw.records group by all having count(*) > 1
+            )
+            select shared.yr, shared.id, field.key
+            from raw.records
+            join shared on (payload->>'year') = shared.yr and (payload->>'id_') = shared.id,
+            lateral json_each(payload) field
             group by all having count(distinct field.value) > 1 limit 1""").fetchone()
         if conflict:
             raise ValueError(f"conflicting overlap at year, ID, variable {conflict}")

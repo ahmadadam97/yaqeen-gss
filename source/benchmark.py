@@ -8,7 +8,7 @@ from tempfile import TemporaryDirectory
 
 import duckdb
 from load import ROOT
-from snapshot import current_run, build_root, digest
+from snapshot import current_run, build_root, definition_digest
 
 
 def measure(con, sql):
@@ -53,22 +53,18 @@ def materialization_cost(database, sql, scratch):
 def main():
     run, manifest = current_run()
     database = run / "gss.duckdb"
-    compiled = run / "dbt/compiled/gss/models"
-    model_sql = {name: (compiled / f"{name}.sql").read_text(encoding="utf8")
-                 for name in ("stg_membership", "answers", "respondents")}
+    compiled = run / "dbt/compiled/gss"
+    model_sql = {name: (compiled / "models" / layer / f"{name}.sql").read_text(encoding="utf8")
+                 for name, layer in (("stg_membership", "staging"), ("answers", "marts"), ("respondents", "marts"))}
     with duckdb.connect(str(database), read_only=True) as con:
         con.execute("set threads=1")
         con.execute("create temp view baseline_interviews as " + model_sql["respondents"])
-        con.execute("create temp view baseline_membership as " + model_sql["stg_membership"])
         results = []
-        for path in sorted((ROOT / "source/sql").glob("*.sql")):
-            if digest(path) != manifest["definitions"].get(path.relative_to(ROOT).as_posix()):
+        for path in sorted((ROOT / "dbt/analyses").glob("*.sql")):
+            if definition_digest(path) != manifest["definitions"].get(path.relative_to(ROOT).as_posix()):
                 raise ValueError(f"Query changed since publication: {path.name}; rebuild the pipeline")
-            sql = path.read_text(encoding="utf8")
-            before = sql.replace("from stg_membership", "from baseline_membership")
-            if not path.name.startswith("07"):
-                before = before.replace("from respondents", "from baseline_interviews").replace(
-                    "join respondents", "join baseline_interviews")
+            sql = (compiled / "analyses" / path.name).read_text(encoding="utf8")
+            before = sql.replace('"gss"."marts"."respondents"', "baseline_interviews")
             ms, rows = measure(con, before)
             assert rows == con.execute(sql).fetchall(), path.name
             results.append((ms, path.name, before, sql, rows))
@@ -83,12 +79,12 @@ def main():
             scratch = Path(temp) / model
             scratch.mkdir()
             costs[model] = materialization_cost(database, sql, scratch)
-    changed_model = "stg_membership" if name.startswith("07") else "respondents"
+    changed_model = "respondents"
     cost = costs[changed_model]
     reads = break_even_reads(cost["build_ms"], ms, after_ms)
     evidence = dict(run_id=manifest["run_id"], inputs=manifest["inputs"],
-                    model_hashes={name:value for name,value in manifest["definitions"].items() if name.startswith("dbt/")},
-                    query_hashes={name:value for name,value in manifest["definitions"].items() if name.startswith("source/sql/")},
+                    model_hashes={name:value for name,value in manifest["definitions"].items() if name.startswith("dbt/") and not name.startswith("dbt/analyses/")},
+                    query_hashes={name:value for name,value in manifest["definitions"].items() if name.startswith("dbt/analyses/")},
                     slowest_query=name, changed_model=changed_model, before_ms=ms, after_ms=after_ms,
                     equal_result_rows=len(rows), break_even_reads=reads, materialization=costs,
                     method="One thread. Read medians: 3 warm runs after 1 warm-up. Build medians: 3 fresh isolated databases, CTAS plus checkpoint. Dependencies remain materialized in the read-only source. Storage is the incremental file size over the same model as a view. Excludes dbt process startup, upstream storage, and monetary storage cost.")

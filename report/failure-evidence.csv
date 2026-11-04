@@ -1,0 +1,19 @@
+problem,expected,stopped_by,previous_run_kept,as_expected
+Truncated file,loader,loader,true,true
+File edited without review,loader,loader,true,true
+Duplicate interview in a file,loader,loader,true,true
+Overlap answers disagree between cuts,loader,loader,true,true
+Column with no catalog entry,loader,loader,true,true
+Label not in the codebook,invalid_answers,invalid_answers,true,true
+TV hours out of range (99),invalid_answers,invalid_answers,true,true
+A wave outside the reviewed years,invalid_answers,invalid_answers,true,true
+"Half of 2018 deleted, manifest resealed",wave_row_counts,wave_row_counts,true,true
+POSTLIFE blank for all of 2018,wave_coverage,wave_coverage,true,true
+PRAY column missing from cut B,wave_coverage,wave_coverage,true,true
+EVWORK answered by a full-time worker,survey_routing,survey_routing,true,true
+NEWS answered on ballot C,survey_routing,survey_routing,true,true
+SATJOB answered by a retiree,survey_routing,survey_routing,true,true
+Web hours from someone who said no web,survey_routing,survey_routing,true,true
+A ballot the rules do not cover,survey_routing,survey_routing,true,true
+Cut renamed but seed not updated,metadata_contract,metadata_contract,true,true
+Column shifted one row within a wave,not detectable,not detected,false,true

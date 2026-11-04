@@ -1,0 +1,48 @@
+version: 2
+seeds:
+  - name: codebook
+    description: What every exported label means and what kind of value it is. The loader rejects an extract whose codes disagree with this file.
+    columns:
+      - {name: variable, description: Explorer variable name.}
+      - {name: source_code, description: NORC numeric code. Negative codes are missing-data types.}
+      - {name: label, description: The label exactly as exported.}
+      - {name: kind, description: "The value answer for a genuine answer, otherwise the missing-data type."}
+  - name: variables
+    description: One row per catalogued variable. Add a row here and in codebook to add a variable; no model changes. The derived columns in respondents need the value projections of wrkstat, wwwhr and wwwmin.
+    columns:
+      - {name: variable, description: Explorer variable name.}
+      - {name: description, description: Short meaning from the Explorer.}
+      - {name: kind, description: "category, integer or weight. Decides how a value is validated."}
+      - {name: min_value, description: Lowest valid number for integer and weight kinds.}
+      - {name: max_value, description: Highest valid number for integer and weight kinds.}
+      - {name: reviewed_years, description: Pipe-separated waves whose routing has been reviewed. Any other wave fails a test.}
+      - {name: universe, description: Who was asked this question.}
+      - {name: wide_label, description: Add the readable label to respondents.}
+      - {name: wide_value, description: "Add the numeric value to respondents as variable_value."}
+      - {name: wide_status, description: "Add the response status to respondents as variable_status."}
+      - {name: min_valid_pct, description: "Lowest acceptable share of genuine answers among all interviews, per wave. Set at 80% of the lowest observed share, so losing most of a wave fails but ordinary drift does not."}
+  - name: eligibility
+    description: Reviewed item availability by wave and numeric ballot/form codes. Inapplicable labels outside the reviewed combinations become not_asked_ballot.
+    columns:
+      - {name: variable, description: Explorer variable name.}
+      - {name: survey_year, description: Interview wave.}
+      - {name: ballot_code, description: Numeric ballot code.}
+      - {name: form_code, description: Numeric form code.}
+      - {name: is_eligible, description: Whether this ballot/form combination was asked the item.}
+  - name: work_status
+    description: Codebook-based employment and routing flags per WRKSTAT code.
+    columns:
+      - {name: source_code, description: WRKSTAT code.}
+      - {name: is_working, description: Holds a job, including when temporarily absent.}
+      - {name: ever_work_eligible, description: Routed to EVWORK.}
+      - {name: satjob_eligible, description: Routed to SATJOB.}
+  - name: wave_expectations
+    description: Interviews NORC released per wave. A truncated extract fails against this even when its manifest was resealed.
+    columns:
+      - {name: survey_year, description: Interview wave.}
+      - {name: expected_interviews, description: Expected distinct interviews in that wave.}
+  - name: extract_cuts
+    description: Maps each committed extract to the cut it represents, so the overlap audit does not hard-code filenames.
+    columns:
+      - {name: filename, description: Committed JSON basename.}
+      - {name: cut, description: "Cut label, A or B."}
