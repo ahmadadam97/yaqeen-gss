@@ -96,7 +96,7 @@ Open that database read-only. Analysts use `marts.respondents` (one row per inte
 | `docs/production.md` | AWS sketch and additional sources |
 | `report/survey-assessment.pdf` | The report |
 | `report/results/` | Committed analytical output and a guide to reading it |
-| `.github/workflows/check.yml` | CI: clean install, tests, pipeline, comparison with committed results |
+| `.github/workflows/check.yml` | CI: clean install, tests, pipeline, comparison with committed results, report rebuild |
 
 ## Reproduce the extracts
 

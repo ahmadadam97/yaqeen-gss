@@ -27,8 +27,15 @@ jobs:
           from snapshot import current_run
           run, manifest = current_run()
           assert manifest["row_counts"]["respondents"] == 7753
-          for expected in Path("report/results").glob("*.csv"):
-              with expected.open(encoding="utf8") as a, (run / "results" / expected.name).open(encoding="utf8") as b:
-                  assert list(csv.reader(a)) == list(csv.reader(b)), expected.name
+          committed = {path.name for path in Path("report/results").glob("*.csv")}
+          published = {path.name for path in (run / "results").glob("*.csv")}
+          assert committed == published, committed ^ published
+          for name in sorted(committed):
+              with Path("report/results", name).open(encoding="utf8") as a, (run / "results" / name).open(encoding="utf8") as b:
+                  assert list(csv.reader(a)) == list(csv.reader(b)), name
           print("Verified", len(manifest["outputs"]), "hashed artifacts and all committed results")
           PY
+      - name: Rebuild the report
+        run: |
+          .env/bin/python -m pip install --only-binary=:all: reportlab==4.4.9
+          .env/bin/python report/build_report.py
