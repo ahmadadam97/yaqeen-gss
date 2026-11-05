@@ -5,10 +5,10 @@ from scipy.stats import kruskal, spearmanr
 
 
 def summarize(con):
-    rows = con.execute("""select c.source_code, r.tvhours_value
-        from respondents r join codebook c on c.variable='satjob' and c.label=r.satjob
-        where r.is_working and r.tvhours_value is not null and c.kind='answer'
-        order by r.survey_year, r.respondent_id""").fetchall()
+    rows = con.execute("""select satjob_value, tvhours_value
+        from marts.respondents
+        where is_working and satjob_value is not null and tvhours_value is not null
+        order by survey_year, respondent_id""").fetchall()
     groups = defaultdict(list)
     for code, hours in rows:
         groups[code].append(hours)

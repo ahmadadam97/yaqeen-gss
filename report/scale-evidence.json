@@ -1,0 +1,30 @@
+[
+  {
+    "rows": 75700,
+    "columns": 30,
+    "answer_rows": 2271000,
+    "json_mb": 37,
+    "load_s": 2.3,
+    "dbt_s": 11.4,
+    "database_gb": 0.08
+  },
+  {
+    "rows": 75700,
+    "columns": 100,
+    "answer_rows": 7570000,
+    "json_mb": 97,
+    "load_s": 6.1,
+    "dbt_s": 51.6,
+    "database_gb": 0.14
+  },
+  {
+    "rows": 75700,
+    "columns": 300,
+    "answer_rows": 22710000,
+    "json_mb": 269,
+    "load_s": 16.7,
+    "dbt_s": 189.7,
+    "failed_at": "dbt",
+    "error": "Runtime Error in model answers (models\\marts\\answers.sql) | IO Error: Could not write file \"c:\\users\\ahmad\\appdata\\local\\temp\\scale-cqqr9in1\\300\\gss.duckdb.tmp\\duckdb_temp_storage_S32K-4.tmp\" (error in WriteFile): There is not enough space on the disk."
+  }
+]

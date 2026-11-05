@@ -12,6 +12,11 @@ def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def definition_digest(path):
+    """Ignore line endings, so a definition hashes the same on every checkout."""
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+
+
 def build_root():
     return Path(os.environ.get("GSS_BUILD", ROOT / "build")).resolve()
 

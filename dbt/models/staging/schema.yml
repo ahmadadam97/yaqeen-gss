@@ -1,0 +1,38 @@
+version: 2
+sources:
+  - name: raw
+    schema: raw
+    description: Loaded unchanged by source/load.py. dbt only reads this schema.
+    tables:
+      - name: records
+        description: One immutable source observation per filename and row ordinal.
+        columns:
+          - {name: filename, description: Committed JSON basename in the extract manifest.}
+          - {name: ordinal, description: One-based row position in that file.}
+          - {name: payload, description: The source row as JSON with its original labels.}
+      - name: files
+        description: One row per loaded extract with its hash and row count.
+        columns:
+          - {name: filename, description: Committed JSON basename in the extract manifest.}
+          - {name: sha256, description: Hash of the exact source bytes.}
+          - {name: row_count, description: Rows read from the file.}
+
+models:
+  - name: stg_membership
+    description: Which extract holds each interview. An interview in both cuts has two rows here and one row in the marts.
+    columns:
+      - {name: filename, description: Committed JSON basename in the extract manifest.}
+      - {name: ordinal, description: One-based source row position.}
+      - name: survey_year
+        description: Cross-sectional GSS wave.
+        tests: [not_null]
+      - name: respondent_id
+        description: ID within this wave. It repeats between waves, so it is never a key alone.
+        tests: [not_null]
+  - name: stg_answers
+    description: One row per interview and received field, unpacked from the raw JSON with its original label. The overlap is already removed.
+    columns:
+      - {name: survey_year, description: Cross-sectional GSS wave.}
+      - {name: respondent_id, description: ID within this wave.}
+      - {name: variable, description: NORC field name as received.}
+      - {name: raw_label, description: The exported label or number, before any decoding.}

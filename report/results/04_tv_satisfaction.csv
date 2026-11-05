@@ -1,5 +1,5 @@
-cohort,satisfaction,group_n,mean_tv_hours
-Currently working; valid TV and work satisfaction,Very satisfied,1415,2.32
-Currently working; valid TV and work satisfaction,Moderately satisfied,1091,2.37
-Currently working; valid TV and work satisfaction,A little dissatisfied,251,2.39
-Currently working; valid TV and work satisfaction,Very dissatisfied,88,2.55
+cohort,satisfaction,group_n,mean_tv_hours,wtssps_mean_tv_hours,effective_n
+Currently working; valid TV and work satisfaction,Very satisfied,1415,2.32,2.31,988.0
+Currently working; valid TV and work satisfaction,Moderately satisfied,1091,2.37,2.3,717.0
+Currently working; valid TV and work satisfaction,A little dissatisfied,251,2.39,2.22,156.0
+Currently working; valid TV and work satisfaction,Very dissatisfied,88,2.55,2.24,58.0

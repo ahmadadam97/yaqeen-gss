@@ -7,14 +7,21 @@ Use DuckDB because it supports SQL analytics and dbt in a single local file. The
 
 The design assumes column indices align in the Explorer export, code meanings are stable across these selected waves, and every original file remains available. If these assumptions fail, investigate before combining records. Descriptive results use observed answers and display denominators.
 
-Local setup and the run command are in the [README](../README.md#run-from-the-repository-root). The measured change from the planned membership view to a table is documented in the report.
+Local setup and the run command are in the [README](../README.md#run-it).
 
-## Current publication design after review
+## Where the build diverged from this note
 
-The initial note is preserved above. The current runner rebuilds a candidate database from all reviewed sources, validates it through dbt and publishes the complete run through one atomic LATEST pointer. This trades a cheap full rebuild for straightforward recovery and a consistent database/results pair. Source membership remains fully auditable. Wide projections, work-status meaning and ballot/form eligibility now come from seeds. source_status preserves the codebook missing kind; status can explain an excluded ballot/form combination. The run manifest records inputs, definitions, counts and output hashes. See profile.md, analyst-guide.md and production.md for coverage, interpretation and production assumptions.
+The initial note is preserved above. The final build differs in these ways:
 
-## Current validation boundaries
+- **Rebuild, not insert.** The runner builds a fresh candidate database from all reviewed sources, validates it through dbt and publishes the complete run through one atomic LATEST pointer. This trades a cheap full rebuild for straightforward recovery and a consistent database and results pair. The loader's insert-skip behaviour remains and is what its idempotence tests exercise.
+- **More metadata than a codebook.** Profiling showed routing mattered more than expected, so wide projections, work-status meaning, ballot/form eligibility, wave counts and cut names also became seeds. `source_status` keeps the codebook's missing kind, and `status` can explain an excluded ballot/form combination.
+- **Layers as schemas.** The note named a staging view and a decoded table. These became the `staging` and `marts` schemas, with seeds in `metadata`. `stg_membership` stays a view as planned.
+- **A manifest.** Each run records inputs, definitions, counts and output hashes.
 
-The synthetic rejection lab is kept outside the submission repository. It confirms type/range, overlap, routing and publication checks, but also exposes conditional checks that are not yet implemented: positive web duration after USEWWW=NO, a combined duration above 168 hours, and observed split-item answers in an unknown ballot/form context. No minimum-coverage gate currently rejects an entirely unanswered reviewed source. Agree whether each condition should fail, warn or be quarantined before adding rules; do not rewrite source responses or convert unknowns to zero.
+See profile.md, analyst-guide.md and production.md for coverage, interpretation and production assumptions.
 
-A read-only check of the submitted data found zero cases of the first three conditions. Seven interviews have unknown work status, so they remain in the general respondent table but cannot enter the known-working/nonworking cohorts. A reviewed checksum/count manifest cannot detect interviews omitted before review or valid-looking equal-length columns that were misaligned upstream. Those need independent source counts or row-level provenance.
+## Validation boundaries
+
+`source/failure_check.py` corrupts copies of the project and records which check stops each case; the result is in `report/failure-evidence.csv`. A bad extract fails the whole run instead of being quarantined, because silently dropping survey respondents would bias every estimate. No check rewrites a source response or converts an unknown to zero.
+
+Seven interviews have unknown work status, so they remain in the respondent table but cannot enter the known-working or nonworking cohorts. Valid-looking equal-length columns that were misaligned upstream cannot be detected inside a wave held by one cut alone; the overlap comparison covers only the shared wave. Detecting that would need row-level provenance from the source.

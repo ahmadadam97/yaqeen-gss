@@ -1,31 +1,31 @@
-variable,description,kind,min_value,max_value,reviewed_years,universe,wide_label,wide_value,wide_status
-wrkstat,labor force status,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,true,false
-evwork,ever work as long as one year,category,,,2014|2016|2018,WRKSTAT codes 5 through 8,true,false,false
-indus10,r's industry code (naics 2007),category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false
-age,age of respondent,integer,18,89,2014|2016|2018,All three selected waves; retain original missing codes,false,true,false
-educ,highest year of school completed,category,,,2014|2016|2018,All three selected waves; retain original missing codes,false,true,false
-degree,r's highest degree,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false
-sex,respondents sex,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false
-region,region of interview,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false
-relig,r's religious preference,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false
-attend,how often r attends religious services,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false
-reliten,strength of affiliation,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false
-postlife,belief in life after death,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,true
-pray,how often does r pray,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,true,false
-relig16,religion in which raised,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false
-satjob,work satisfaction,category,,,2014|2016|2018,Work item; alternative wording on 2016 ballot A form Y,true,false,false
-news,how often does r read newspaper,category,,,2014|2016|2018,A/B ballots; follow survey routing,true,false,false
-tvhours,hours per day watching tv,integer,0,24,2014|2016|2018,A/B ballots; follow survey routing,false,true,false
-form,form of split questionnaire asked,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false
-compuse,r use computer,category,,,2014|2016|2018,A/B ballots; follow survey routing,false,false,false
-webmob,r uses home internet through mobile device,category,,,2014|2016|2018,A/B ballots; follow survey routing,false,false,false
-emailmin,email minutes per week,integer,0,59,2014|2016|2018,A/B ballots; follow survey routing,false,false,false
-emailhr,email hours per week,integer,0,168,2014|2016|2018,A/B ballots; follow survey routing,false,false,false
-usewww,r use www other than email,category,,,2014|2016|2018,A/B ballots; follow survey routing,false,false,false
-wwwhr,www hours per week,integer,0,168,2014|2016|2018,A/B ballots; follow survey routing,false,true,false
-wwwmin,www minutes per week,integer,0,59,2014|2016|2018,A/B ballots; follow survey routing,false,true,false
-inttech,interested in technologies,category,,,2014|2016|2018,Science module; ballot and form vary by year,true,false,false
-mode,interview done in-person or over the phone,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false
-ballot,ballot used for interview,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false
-wtssps,person post-stratification weight,weight,0,,2014|2016|2018,All three selected waves; retain original missing codes,false,true,false
-wtssnrps,"Person post-stratification weight, nonrespondents adjusted",weight,0,,2014|2016|2018,All three selected waves; retain original missing codes,false,true,false
+variable,description,kind,min_value,max_value,reviewed_years,universe,wide_label,wide_value,wide_status,min_valid_pct
+wrkstat,labor force status,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,true,false,79
+evwork,ever work as long as one year,category,,,2014|2016|2018,WRKSTAT codes 5 through 8,true,false,false,27
+indus10,r's industry code (naics 2007),category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false,76
+age,age of respondent,integer,18,89,2014|2016|2018,All three selected waves; retain original missing codes,false,true,false,79
+educ,highest year of school completed,category,,,2014|2016|2018,All three selected waves; retain original missing codes,false,true,false,79
+degree,r's highest degree,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false,79
+sex,respondents sex,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false,80
+region,region of interview,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false,80
+relig,r's religious preference,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false,79
+attend,how often r attends religious services,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false,79
+reliten,strength of affiliation,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false,78
+postlife,belief in life after death,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,true,70
+pray,how often does r pray,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,true,false,79
+relig16,religion in which raised,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false,79
+satjob,work satisfaction,category,,,2014|2016|2018,Work item; alternative wording on 2016 ballot A form Y,true,true,false,49
+news,how often does r read newspaper,category,,,2014|2016|2018,A/B ballots; follow survey routing,true,false,false,52
+tvhours,hours per day watching tv,integer,0,24,2014|2016|2018,A/B ballots; follow survey routing,false,true,false,52
+form,form of split questionnaire asked,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false,80
+compuse,r use computer,category,,,2014|2016|2018,A/B ballots; follow survey routing,false,false,false,52
+webmob,r uses home internet through mobile device,category,,,2014|2016|2018,A/B ballots; follow survey routing,false,false,false,9
+emailmin,email minutes per week,integer,0,59,2014|2016|2018,A/B ballots; follow survey routing,false,false,false,46
+emailhr,email hours per week,integer,0,168,2014|2016|2018,A/B ballots; follow survey routing,false,false,false,46
+usewww,r use www other than email,category,,,2014|2016|2018,A/B ballots; follow survey routing,false,false,false,6
+wwwhr,www hours per week,integer,0,168,2014|2016|2018,A/B ballots; follow survey routing,false,true,false,44
+wwwmin,www minutes per week,integer,0,59,2014|2016|2018,A/B ballots; follow survey routing,false,true,false,44
+inttech,interested in technologies,category,,,2014|2016|2018,Science module; ballot and form vary by year,true,false,false,38
+mode,interview done in-person or over the phone,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false,79
+ballot,ballot used for interview,category,,,2014|2016|2018,All three selected waves; retain original missing codes,true,false,false,80
+wtssps,person post-stratification weight,weight,0,,2014|2016|2018,All three selected waves; retain original missing codes,false,true,false,80
+wtssnrps,"Person post-stratification weight, nonrespondents adjusted",weight,0,,2014|2016|2018,All three selected waves; retain original missing codes,false,true,false,80

@@ -1,0 +1,13 @@
+version: 2
+analyses:
+  - {name: 01_prayer, description: "Q1. Prayer frequency by religion raised in, weighted and unweighted."}
+  - {name: 02_afterlife, description: "Q2. Belief in life after death by wave, with counts of everyone without an answer."}
+  - {name: 03_industry, description: "Q3. Leading industry per degree among current workers, with the runner-up and a z for the lead."}
+  - {name: 04_tv_satisfaction, description: "Q4. TV hours by work satisfaction with group sizes."}
+  - {name: 05_ever_work, description: "Q5. Share of nonworkers who ever worked a year, with bounds and an industry-based narrowing."}
+  - {name: 06_wave_changes, description: "Q6. Newspaper and TV change between waves with approximate standard errors."}
+  - {name: 07_overlap, description: "Audit of the overlap between the two cuts and of single counting."}
+  - {name: 09_ballot_coverage, description: "Coverage. Valid answers by wave, ballot and split item."}
+  - {name: 10_weight_sensitivity, description: "Sensitivity. Headline estimates under WTSSPS and WTSSNRPS."}
+  - {name: 12_report_summary, description: "Counts quoted in the report."}
+  - {name: 14_work_status_sensitivity, description: "Sensitivity. Q3 to Q5 without temporarily absent workers, weighted and unweighted."}

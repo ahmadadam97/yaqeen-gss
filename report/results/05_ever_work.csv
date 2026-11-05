@@ -1,2 +1,2 @@
-nonworking_n,eligible_n,valid_n,yes_n,yes_pct_of_valid,unknown_n,job_seekers_routed_out_n,eligible_missing_n,lower_bound_pct,upper_bound_pct
-3034,2728,2726,2467,90.5,308,306,2,81.31,91.46
+nonworking_n,eligible_n,valid_n,yes_n,yes_pct_of_valid,wtssps_yes_pct_of_valid,unknown_n,job_seekers_routed_out_n,eligible_missing_n,lower_bound_pct,upper_bound_pct,wtssps_lower_bound_pct,wtssps_upper_bound_pct,yes_with_industry_n,no_with_industry_n,job_seekers_with_industry_n,wtssps_lower_bound_with_industry_pct
+3034,2728,2726,2467,90.5,87.51,308,306,2,81.31,91.46,78.46,88.8,2447,0,291,88.3

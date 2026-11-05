@@ -1,6 +1,6 @@
-cohort,degree,industry,n,group_n
-Currently working; valid degree and industry,Associate/junior college,Hospitals,41,398
-Currently working; valid degree and industry,Bachelor's,Elementary and secondary schools,109,1037
-Currently working; valid degree and industry,Graduate,Elementary and secondary schools,94,582
-Currently working; valid degree and industry,High school,Construction,186,2275
-Currently working; valid degree and industry,Less than high school,Construction,53,384
+cohort,degree,industry,n,group_n,wtssps_pct,runner_up_industry,runner_up_n,runner_up_wtssps_pct,wtssps_lead_z
+Currently working; valid degree and industry,Associate/junior college,Hospitals,41,398,8.5,Restaurants and other food services,16,4.56,1.81
+Currently working; valid degree and industry,Bachelor's,Elementary and secondary schools,109,1037,9.75,Hospitals,64,6.33,2.3
+Currently working; valid degree and industry,Graduate,Elementary and secondary schools,94,582,13.89,"Colleges and universities, including junior colleges",67,11.65,0.85
+Currently working; valid degree and industry,High school,Construction,186,2275,8.98,Restaurants and other food services,162,7.59,1.33
+Currently working; valid degree and industry,Less than high school,Construction,53,384,14.95,Restaurants and other food services,41,12.09,0.89
