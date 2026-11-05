@@ -499,7 +499,7 @@ def story():
         p("<b>Tools:</b> Codex wrote the original code and SQL and helped write the report; an AI reviewer challenged the scope. Claude Code later reviewed the submission, ran it against corrupted data, recomputed the required answers from the raw JSON with separate code (all matched), and implemented the section 12 fixes and this report. "
           "<b>Extent:</b> most code and much of the prose was AI-written, so \"I\" here often means work I directed and did not type. <b>My part:</b> I chose the extracts and years, supplied both cuts, challenged the TV and employment interpretations, and decided which review findings to act on. "
           "For example, I limited the final review to the brief's inputs and moved most findings that depended on other inputs to section 13. "
-          "<b>Time:</b> roughly six hours on the original submission, with the review and fixes after that."),
+          "<b>Time:</b> roughly six hours in total."),
         PageBreak(),
 
         h1("Appendix A. Query plan for the most expensive query"),
