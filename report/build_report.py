@@ -483,13 +483,16 @@ def story():
         ], [0.38, 0.32, 0.3]),
 
         h1("13. Future considerations"),
-        p("These go beyond the two chosen extracts, so I did not build them. Section 9 covers scale. For the rest:"),
-        table(["Not built", "How I would do it"], [
+        p("The first five go beyond the two chosen extracts, so I did not build them; section 9 covers scale. The last three are problems a final AI review found, which I left unchanged."),
+        table(["Item", "How I would do it"], [
             ["True survey errors", "Re-export with VSTRAT and VPSU, review the new manifest, replace Kish z with design-based errors, and weight the Q4 rank tests."],
             ["Subtler bad values", "Reviewed per-wave bands for category shares, a weight cap, and row-level quarantine for agreed cases. Today's checks miss a wave of weights all set to 1, or a loss under about 20%."],
             ["Deeper tests", "A truth table for the <font face='Courier' size='8.5'>work_status</font> seed, and fixtures for the remaining queries and standard errors."],
             ["Other machines", "Linux and macOS commands in the README, and a hash lock for the report renderer."],
             ["Production and sources", "The AWS design in <font face='Courier' size='8.5'>docs/production.md</font>. Pew's Religious Landscape Study as a survey-level check, never joined at person level; Yaqeen format data only in aggregate, with permission and no religious identifiers."],
+            ["Wrong: CSV 14 column", "Q5 bound rows show a denominator of 2,726 but divide by all nonworkers; the estimates are right. Report the real divisor and rerun the benchmark."],
+            ["Wrong: memory claim", "Section 9 says memory filled at 300 variables; the saved evidence has only the disk error. Rerun the scale check recording memory and free disk."],
+            ["Wrong: Q2 label", "Marked high trust, yet about a tenth of each wave said don't know. Add a range counting them as no or yes, as in Q5, plus standard errors, then review the label."],
         ], [0.2, 0.8]),
 
         h1("14. Assumptions and divergence from the design note"),
@@ -498,9 +501,8 @@ def story():
           "See <font face='Courier' size='8.5'>docs/design.md</font>."),
 
         h1("15. AI use and human oversight"),
-        p("<b>Tools:</b> Codex wrote the original code and SQL and helped write the report; an AI reviewer challenged the scope. Claude Code later reviewed the submission, ran it against corrupted data, recomputed the required answers from the raw JSON with separate code (all matched), and implemented the section 12 fixes and this report. "
+        p("<b>Tools:</b> Codex and Claude Code, for writing the code and report, testing and review. "
           "<b>Extent:</b> most code and much of the prose was AI-written, so \"I\" here often means work I directed and did not type. <b>My part:</b> I chose the extracts and years, supplied both cuts, challenged the TV and employment interpretations, and decided which review findings to act on. "
-          "For example, I limited the final review to the brief's inputs and moved most findings that depended on other inputs to section 13. "
           "<b>Time:</b> roughly six hours in total."),
         PageBreak(),
 
