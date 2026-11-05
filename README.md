@@ -68,7 +68,7 @@ Open that database read-only. Analysts use `marts.respondents` (one row per inte
 
 **When something fails:** the run stops, `build/run.log` names the stage and any failed test, `dbt/logs/dbt.log` has the detail, and the previous run stays published. Fix the cause and run the same command again; every run starts from an empty database, so rerunning is always safe.
 
-**What triggers a run:** a person, after reviewing a new extract or definition. A CI workflow is also configured for each push and pull request (`.github/workflows/check.yml`).
+**What triggers a run:** a person, after reviewing a new extract or definition. A CI workflow also runs on each push and pull request (`.github/workflows/check.yml`). A failing CI run marks the commit and pull request as failed. It does not block a merge, because the repository has no required checks; making `survey-checks` a required check on `main` would add that block.
 
 **A new extract:** add the file and its reviewed hash to `docs/extracts.csv`, name its cut in `dbt/seeds/extract_cuts.csv` if it is part of the audit, and for a new wave add its year to `variables.csv`, its rows to `eligibility.csv` and its count to `wave_expectations.csv`. Everything then rebuilds. A hash update is a review decision; recomputing it blindly defeats the check.
 
@@ -81,7 +81,7 @@ Open that database read-only. Analysts use `marts.respondents` (one row per inte
 | Path | Contents |
 |---|---|
 | `source/data/raw/` | The two committed extracts, byte for byte |
-| `source/load.py`, `run.py`, `snapshot.py` | Validation and load, orchestration, reading a published run |
+| `source/load.py`, `run.py`, `snapshot.py`, `tv_diagnostics.py` | Validation and load, orchestration, reading a published run, Q4 rank tests |
 | `source/test_*.py` | Unit tests |
 | `source/failure_check.py`, `scale_check.py`, `benchmark.py` | Evidence for the report |
 | `dbt/models/staging`, `dbt/models/marts` | The transformation layers |

@@ -5,6 +5,7 @@ Every survey result comes from the published CSVs, and every measurement from th
 import csv
 import json
 import sys
+from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "source"))
@@ -55,7 +56,8 @@ def count(value):
 
 
 def one(value):
-    return f"{float(value):.1f}"
+    # Decimal keeps the half-up rule on the published two-decimal text; binary floats printed 14.95 as 14.9.
+    return str(Decimal(str(value)).quantize(Decimal("0.1"), rounding=ROUND_HALF_UP))
 
 
 def p(text):
@@ -436,7 +438,7 @@ def story():
           f"<b>Deliberately not built:</b> incremental models, partitioning, a scheduler, containers and cloud resources. None pays for itself at this size."),
 
         h1("8. Running it, and what happens when it fails"),
-        p("<b>Order:</b> <font face='Courier' size='8.5'>source/run.py</font> validates and loads, runs dbt build (seeds, models, tests), generates docs, runs the analyses, then publishes. <b>Trigger:</b> a person after reviewing a new extract, and CI on each push. "
+        p("<b>Order:</b> <font face='Courier' size='8.5'>source/run.py</font> validates and loads, runs dbt build (seeds, models, tests), generates docs, runs the analyses, then publishes. <b>Trigger:</b> a person after reviewing a new extract, and CI on each push; a failed CI run flags the commit but does not block a merge. "
           "<b>Failure:</b> any failed step stops the rest, including a failed test, which blocks docs and results. Only a final pointer swap publishes a run, so a rerun is always safe. "
           "<b>Evidence:</b> <font face='Courier' size='8.5'>build/run.log</font> names each stage and any failed test, and each run's manifest records hashes of inputs, definitions and outputs. "
           "<b>Configuration:</b> no credentials exist; the only setting is the optional <font face='Courier' size='8.5'>GSS_BUILD</font>. <b>Tested on</b> Windows 11 with Python 3.12."),
