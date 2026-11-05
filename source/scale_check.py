@@ -1,6 +1,6 @@
 """Measure the load and the dbt build at larger shapes, using synthetic rows copied from the real records.
 
-The wave row-count and extract-name checks are excluded because this synthetic file is deliberately not the real data.
+The wave row-count, weight-total and extract-name checks are excluded because this synthetic file is deliberately not the real data.
 Usage: python source/scale_check.py [columns ...]   Writes report/scale-evidence.json.
 """
 import csv
@@ -79,7 +79,7 @@ def measure(records, column_count, scratch):
     start = time.perf_counter()
     env = dict(os.environ, GSS_DB=str(database), DBT_SEND_ANONYMOUS_USAGE_STATS="false", PYTHONUTF8="1", DBT_USE_COLORS="false")
     dbt = subprocess.run([sys.executable, "-c", "from dbt.cli.main import cli; cli()", "build", "--profiles-dir", ".",
-                          "--exclude", "wave_row_counts", "metadata_contract", "--target-path", str(project / "target")],
+                          "--exclude", "wave_row_counts", "wave_weight_totals", "metadata_contract", "--target-path", str(project / "target")],
                          cwd=project / "dbt", env=env, capture_output=True, text=True, encoding="utf8", errors="replace")
     result["dbt_s"] = round(time.perf_counter() - start, 1)
     if dbt.returncode:

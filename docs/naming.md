@@ -6,13 +6,13 @@ Everything in the dbt layer uses lower snake case. Names say what a thing is to 
 |---|---|---|
 | Schemas | The layer they hold | `raw`, `staging`, `marts`, `metadata` |
 | Folders | Match the schema | `dbt/models/staging`, `dbt/models/marts` |
-| Staging models | `stg_` plus what they expose | `stg_membership` |
+| Staging models | `stg_` plus what they expose | `stg_membership`, `stg_answers` |
 | Mart models | Plural noun for what one row is | `respondents`, `answers` |
 | Sources | The schema name, and the table the loader wrote | `raw.records`, `raw.files` |
-| Seeds | Plural noun for what they list | `variables`, `extract_cuts`, `wave_expectations` |
+| Seeds | Plural noun for what they list, or the name of the reference they hold | `variables`, `extract_cuts`, `codebook`, `eligibility` |
 | Singular tests | The expectation they enforce | `wave_coverage`, `survey_routing` |
 | Analyses | Number plus topic, so results list in question order | `06_wave_changes` |
-| Result files | The same name as their analysis | `report/results/06_wave_changes.csv` |
+| Result files | The same name as their analysis, or a `04_` name for the rank tests computed in Python | `report/results/06_wave_changes.csv` |
 | Variables | NORC's name, so the codebook stays searchable | `wrkstat`, `relig16` |
 
 The only renamed source fields are `year` and `id_`, exposed as `survey_year` and `respondent_id`.
@@ -37,7 +37,7 @@ Keywords are lower case. One selected column per line where a query has more tha
 
 ## Adding a variable
 
-1. Select it in the Explorer and add it to the extract.
+1. Select it in the Explorer, add it to the extract, and record the reviewed hash and row count in `docs/extracts.csv`.
 2. Append a row to `dbt/seeds/variables.csv`: its kind, range, reviewed years, wide-table flags and `min_valid_pct`.
 3. Append its exported labels to `dbt/seeds/codebook.csv`.
 4. If it appears only on some ballots or forms, add its rows to `dbt/seeds/eligibility.csv`.

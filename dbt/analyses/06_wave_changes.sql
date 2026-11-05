@@ -52,7 +52,9 @@ changes as (
         100 * (wtssps_never_news - lag(wtssps_never_news) over wave_order) as wtssps_never_change,
         100 * sqrt(wtssps_never_news_variance + lag(wtssps_never_news_variance) over wave_order) as wtssps_never_se,
         wtssps_tv_mean - lag(wtssps_tv_mean) over wave_order as wtssps_tv_change,
-        sqrt(wtssps_tv_mean_variance + lag(wtssps_tv_mean_variance) over wave_order) as wtssps_tv_se
+        sqrt(wtssps_tv_mean_variance + lag(wtssps_tv_mean_variance) over wave_order) as wtssps_tv_se,
+        100 * (wtssps_daily_news - first_value(wtssps_daily_news) over wave_order) as wtssps_news_since_first,
+        100 * sqrt(wtssps_daily_news_variance + first_value(wtssps_daily_news_variance) over wave_order) as wtssps_news_since_first_se
     from estimates
     window wave_order as (order by survey_year)
 )
@@ -80,6 +82,8 @@ select
     round(wtssps_tv_mean, 2) as wtssps_mean_tv_hours,
     round(wtssps_tv_change, 2) as wtssps_tv_change_hours,
     round(wtssps_tv_se, 3) as wtssps_tv_change_se_hours,
-    round(wtssps_tv_change / nullif(wtssps_tv_se, 0), 2) as wtssps_tv_z
+    round(wtssps_tv_change / nullif(wtssps_tv_se, 0), 2) as wtssps_tv_z,
+    round(wtssps_news_since_first, 2) as wtssps_news_since_first_pp,
+    round(wtssps_news_since_first / nullif(wtssps_news_since_first_se, 0), 2) as wtssps_news_since_first_z
 from changes
 order by survey_year

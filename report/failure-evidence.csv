@@ -8,6 +8,7 @@ Label not in the codebook,invalid_answers,invalid_answers,true,true
 TV hours out of range (99),invalid_answers,invalid_answers,true,true
 A wave outside the reviewed years,invalid_answers,invalid_answers,true,true
 "Half of 2018 deleted, manifest resealed",wave_row_counts,wave_row_counts,true,true
+One 2018 weight set to 5000,wave_weight_totals,wave_weight_totals,true,true
 POSTLIFE blank for all of 2018,wave_coverage,wave_coverage,true,true
 PRAY column missing from cut B,wave_coverage,wave_coverage,true,true
 EVWORK answered by a full-time worker,survey_routing,survey_routing,true,true

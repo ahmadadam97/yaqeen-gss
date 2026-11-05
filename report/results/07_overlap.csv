@@ -1,2 +1,2 @@
-a,b,shared,distinct_n,analysis_rows,distinct_interview_keys,distinct_ids_alone,pct_a,pct_b,duplicate_analysis_rows,interviews_lost_using_id_alone
+cut_a_n,cut_b_n,shared_n,distinct_n,analysis_rows,distinct_interview_keys,distinct_ids_alone,shared_of_cut_a_pct,shared_of_cut_b_pct,duplicate_analysis_rows,interviews_lost_using_id_alone
 5405,5215,2867,7753,7753,7753,2867,53.04,54.98,0,4886

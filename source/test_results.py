@@ -128,19 +128,6 @@ class ResultsTests(unittest.TestCase):
             self.assertFalse((build / ".run.lock").exists())
             self.assertEqual(list((build / "runs").iterdir()), [])
 
-    def test_weighted_denominator_and_media_routing(self):
-        with duckdb.connect() as con:
-            con.execute("""create table respondents as select * from (values
-                (2014,1,'YES',1,2,18,'Every day',0), (2014,2,'NO',3,2,34,'Never',10),
-                (2014,1,null,90,90,30,'Every day',null), (2014,6,'NO',1,1,55,null,null))
-                r(survey_year,pray_value,postlife,wtssps_value,wtssnrps_value,age_value,news,web_hours_weekly)""")
-            faith = con.execute(analysis("10_prayer_afterlife")).fetchall()
-            self.assertEqual(faith[0][2:], (3,2,1,50,2,25,2,50))
-            self.assertEqual(faith[1][-1], 0)
-            media = con.execute(analysis("11_media_by_age")).fetchall()
-            self.assertEqual(media[0][2:], (3,3,2,2,66.67,50,5))
-            self.assertEqual(media[1][-3:], (0,None,None))
-
     def test_pair_overlap_stays_scoped_when_a_third_cut_is_added(self):
         with duckdb.connect() as con:
             con.execute("""create table stg_membership as select * from (values
@@ -169,23 +156,56 @@ class ResultsTests(unittest.TestCase):
             con.execute("insert into respondents values (3,true,'Very satisfied',2)")
             self.assertEqual(con.execute(sql).fetchone(), (2,3,3,3,0))
 
-    def test_zero_coverage_wave_is_visible(self):
-        with duckdb.connect() as con:
-            con.execute("""create table respondents as
-                select * from (values (2014,'Very interested'),(2016,null),(2016,null))
-                t(survey_year,inttech)""")
-            rows = con.execute(analysis("08_technology_interest")).fetchall()
-            self.assertIn(("2016", "No valid responses", 0, 0, 2, None, 0), rows)
-
-    def test_explicit_nonuser_sensitivity_preserves_ordinary_missing(self):
+    def test_prayer_is_weighted_within_upbringing(self):
         with duckdb.connect() as con:
             con.execute("""create table respondents as select * from (values
-                (2018,1,20,'Every day',null),(2018,2,21,'Never',null),(2018,3,22,'Never',10))
-                r(survey_year,respondent_id,age_value,news,web_hours_weekly)""")
-            con.execute("""create table answers as select * from (values
-                (2018,1,'usewww','NO','answer'),(2018,1,'wwwhr',null,'inapplicable'),(2018,1,'wwwmin',null,'inapplicable'),
-                (2018,2,'usewww',null,'no_answer'),(2018,2,'wwwhr',null,'no_answer'),(2018,2,'wwwmin',null,'no_answer'),
-                (2018,3,'usewww','YES','answer'),(2018,3,'wwwhr','10','answer'),(2018,3,'wwwmin','0','answer'))
-                a(survey_year,respondent_id,variable,answer_label,status)""")
-            rows = con.execute(analysis("13_web_sensitivity")).fetchall()
-            self.assertEqual(rows, [("18-34",1,5)])
+                ('Protestant','Daily',1,3),('Protestant','Never',6,1),(null,'Daily',1,9),('Protestant',null,null,9))
+                r(relig16,pray,pray_value,wtssps_value)""")
+            rows = con.execute(analysis("01_prayer")).fetchall()
+            self.assertEqual(rows[0], ("Protestant", "Daily", 1, 2, 50, 75, True))
+            self.assertEqual(len(rows), 2)
+
+    def test_industry_leader_is_weighted_among_workers_with_a_z_for_the_lead(self):
+        with duckdb.connect() as con:
+            con.execute("""create table respondents as select * from (values
+                (true,'BA','Schools',3),(true,'BA','Schools',1),(true,'BA','Hospitals',2),(true,'BA','Farms',1),
+                (false,'BA','Farms',90),(true,'BA',null,90))
+                r(is_working,degree,indus10,wtssps_value)""")
+            query = con.execute(analysis("03_industry"))
+            row = dict(zip([column[0] for column in query.description], query.fetchone()))
+            self.assertEqual((row["industry"], row["wtssps_pct"], row["n"], row["group_n"]), ("Schools", 57.14, 2, 4))
+            self.assertEqual((row["runner_up_industry"], row["runner_up_wtssps_pct"]), ("Hospitals", 28.57))
+            self.assertEqual(row["wtssps_lead_z"], 0.59)
+
+    def test_tv_is_limited_to_workers_with_both_answers(self):
+        with duckdb.connect() as con:
+            con.execute("""create table respondents as select * from (values
+                (true,'Very satisfied',1,2,3),(true,'Very satisfied',1,4,1),
+                (false,'Very satisfied',1,20,50),(true,null,null,1,1))
+                r(is_working,satjob,satjob_value,tvhours_value,wtssps_value)""")
+            rows = con.execute(analysis("04_tv_satisfaction")).fetchall()
+            self.assertEqual(len(rows), 1)
+            self.assertEqual(rows[0][1:], ("Very satisfied", 2, 3, 2.5, 2))
+
+    def test_ever_work_bounds_and_industry_narrowing(self):
+        with duckdb.connect() as con:
+            con.execute("""create table respondents as select * from (values
+                (false,true,'YES',5,'Schools',3),(false,true,'NO',5,null,1),
+                (false,false,null,4,'Farms',2),(false,false,null,4,null,2),(true,false,null,1,'Farms',50))
+                r(is_working,ever_work_eligible,evwork,wrkstat_value,indus10,wtssps_value)""")
+            query = con.execute(analysis("05_ever_work"))
+            row = dict(zip([column[0] for column in query.description], query.fetchone()))
+            self.assertEqual((row["nonworking_n"], row["valid_n"], row["job_seekers_routed_out_n"]), (4, 2, 2))
+            self.assertEqual(row["wtssps_yes_pct_of_valid"], 75)
+            self.assertEqual((row["wtssps_lower_bound_pct"], row["wtssps_upper_bound_pct"]), (37.5, 87.5))
+            self.assertEqual(row["wtssps_lower_bound_with_industry_pct"], 62.5)
+            self.assertEqual((row["yes_with_industry_n"], row["no_with_industry_n"], row["job_seekers_with_industry_n"]), (1, 0, 1))
+
+    def test_weight_sensitivity_compares_both_weights(self):
+        with duckdb.connect() as con:
+            con.execute("""create table respondents as select * from (values
+                (2014,'YES',3,1,true,null,'Never','BA','Schools'),(2014,'NO',1,3,true,null,'Every day','BA','Farms'))
+                r(survey_year,postlife,wtssps_value,wtssnrps_value,is_working,evwork,news,degree,indus10)""")
+            rows = {row[0]: row[1:] for row in con.execute(analysis("10_weight_sensitivity")).fetchall()}
+            self.assertEqual(rows["Q2 believes in life after death"], ("2014", 75, 25, -50, None))
+            self.assertEqual(rows["Q3 share of the leading industry"], ("BA", 75, 75, 0, False))

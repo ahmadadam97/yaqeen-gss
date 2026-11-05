@@ -7,8 +7,9 @@ group by variable, survey_year, ballot_code, form_code having count(*) <> 1
 
 union all
 
+-- A skip on a ballot that never had the question is not asked, which is different from routed out.
 select variable from {{ ref('answers') }}
-where status = 'not_asked_ballot' and (source_status <> 'inapplicable' or is_eligible is distinct from false)
+where source_status = 'inapplicable' and is_eligible is false and status <> 'not_asked_ballot'
 
 union all
 

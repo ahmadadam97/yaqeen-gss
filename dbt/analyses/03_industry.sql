@@ -1,11 +1,13 @@
 -- Q3: most common industry per degree among current workers, ranked by weighted share.
--- The runner-up is shown because a narrow lead should not be read as a clear winner.
+-- The runner-up and a z for the lead are shown because a narrow lead should not be read as a clear winner.
+-- The z uses Kish effective n and the variance of a difference of two shares of one group, so it is approximate.
 with counts as (
     select
         degree,
         indus10 as industry,
         count(*) as n,
-        sum(wtssps_value) as weight
+        sum(wtssps_value) as weight,
+        sum(wtssps_value ^ 2) as weight_squared
     from {{ ref('respondents') }}
     where is_working
       and degree is not null
@@ -18,7 +20,8 @@ ranked as (
         *,
         dense_rank() over (partition by degree order by weight desc) as position,
         sum(n) over (partition by degree) as group_n,
-        sum(weight) over (partition by degree) as group_weight
+        sum(weight) over (partition by degree) as group_weight,
+        sum(weight_squared) over (partition by degree) as group_weight_squared
     from counts
 )
 
@@ -31,7 +34,16 @@ select
     round(100.0 * leader.weight / leader.group_weight, 2) as wtssps_pct,
     runner_up.industry as runner_up_industry,
     runner_up.n as runner_up_n,
-    round(100.0 * runner_up.weight / runner_up.group_weight, 2) as runner_up_wtssps_pct
+    round(100.0 * runner_up.weight / runner_up.group_weight, 2) as runner_up_wtssps_pct,
+    round(
+        (leader.weight - runner_up.weight) / leader.group_weight
+        / sqrt(
+            ((leader.weight + runner_up.weight) / leader.group_weight
+                - ((leader.weight - runner_up.weight) / leader.group_weight) ^ 2)
+            / (leader.group_weight ^ 2 / leader.group_weight_squared)
+        ),
+        2
+    ) as wtssps_lead_z
 from ranked as leader
 left join ranked as runner_up
     on runner_up.degree = leader.degree

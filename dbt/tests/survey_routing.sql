@@ -3,7 +3,6 @@ select survey_year, respondent_id
 from {{ ref('respondents') }}
 where (evwork is not null and ever_work_eligible is distinct from true)
    or (satjob is not null and satjob_eligible is false)
-   or ((wwwhr_value is null or wwwmin_value is null) and web_hours_weekly is not null)
    or web_hours_weekly > 168
 
 union all

@@ -29,3 +29,10 @@ models:
       - name: respondent_id
         description: ID within this wave. It repeats between waves, so it is never a key alone.
         tests: [not_null]
+  - name: stg_answers
+    description: One row per interview and received field, unpacked from the raw JSON with its original label. The overlap is already removed.
+    columns:
+      - {name: survey_year, description: Cross-sectional GSS wave.}
+      - {name: respondent_id, description: ID within this wave.}
+      - {name: variable, description: NORC field name as received.}
+      - {name: raw_label, description: The exported label or number, before any decoding.}

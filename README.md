@@ -14,7 +14,7 @@ py -3.12 -m venv .env
 .env\Scripts\python.exe source/run.py
 ```
 
-`requirements.lock` pins every package by hash, so a run next month behaves like a run today. The database and results appear under `build/runs/<run ID>`, and `build/LATEST` names the current run.
+`requirements.lock` pins every pipeline package by hash, so a run next month behaves like a run today. The database and results appear under `build/runs/<run ID>`, and `build/LATEST` names the current run.
 
 ## Run the tests
 
@@ -53,7 +53,11 @@ folder, manifest = current_run()
 print(folder / "gss.duckdb")
 ```
 
-Open that database read-only. Analysts use `marts.respondents` (one row per interview) and `marts.answers` (one row per interview and variable, with the reason for any missing answer). To browse the dbt documentation, run `dbt docs serve --target-path` with that run's `dbt` folder.
+Open that database read-only. Analysts use `marts.respondents` (one row per interview) and `marts.answers` (one row per interview and variable, with the reason for any missing answer). To browse the dbt documentation, run this from the `dbt` folder, with the run ID from `build/LATEST`:
+
+```powershell
+..\.env\Scripts\dbt.exe docs serve --profiles-dir . --target-path ..\build\runs\<run ID>\dbt
+```
 
 ## How a run works
 
@@ -83,7 +87,7 @@ Open that database read-only. Analysts use `marts.respondents` (one row per inte
 | `dbt/models/staging`, `dbt/models/marts` | The transformation layers |
 | `dbt/seeds/` | Semantic metadata: codebook, variables, eligibility, work status, wave counts, cuts |
 | `dbt/tests/` | Data expectations |
-| `dbt/analyses/` | The six required queries, overlap audit, coverage, extensions and sensitivities |
+| `dbt/analyses/` | The six required queries, overlap audit, coverage and sensitivities |
 | `docs/design.md` | Design note, and where the build diverged from it |
 | `docs/naming.md` | Naming convention |
 | `docs/profile.md`, `profile.csv` | Pre-build data profile |

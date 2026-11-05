@@ -1,5 +1,5 @@
 {
-  "run_id": "cc7157748ebd4732a19cc87b4ee7230e",
+  "run_id": "f692dcb575154710b12464633a0203fa",
   "inputs": [
     {
       "filename": "yaqeen_cut_a_2014_2016.json",
@@ -14,20 +14,22 @@
   ],
   "model_hashes": {
     "dbt/macros/generate_schema_name.sql": "81ccfcd321bf068820a74e254a2a292740a7bcdcb29bae3094b8664a86261a53",
-    "dbt/models/marts/answers.sql": "f5cba19bdb6103c72257e16c0e9943fd1b7add5891f82552cefb36ae92f7e986",
+    "dbt/models/marts/answers.sql": "47cd84582186998c0dbd3abe8c120a092885f7d5d36f6d8cbaf63eba8f894be7",
     "dbt/models/marts/respondents.sql": "5a7218c7b05f84817318bfd8755df6d38d11c61038c3f438bbdbbaf466c3e3c6",
+    "dbt/models/staging/stg_answers.sql": "ac2b5ebaf2da45f61267d99a8fd8597140c0ba3b9c00de7f9fd0900ab91135ea",
     "dbt/models/staging/stg_membership.sql": "f51503f2fd9dbe79aa5804bd0c8864ac22d1918b658450856265123866b424bf",
     "dbt/tests/answer_grain.sql": "c7018afe563a050d29260d7e8657c4de5bffa598723d80fa041207c2192cea4b",
     "dbt/tests/interview_grain.sql": "b72d3e054bd8d7641d53f9198390fcb37fd76387468422cbc83bd3ba2591d51f",
     "dbt/tests/invalid_answers.sql": "9e05cc447ce8f64ed221a6186b6b776c8eefe114204d6e746873ab446b53910e",
-    "dbt/tests/metadata_contract.sql": "373639bb6e99ebc8940d290561117fe08c317b383f1f36776c92a2feb741bf56",
-    "dbt/tests/missing_semantics.sql": "9799747248e7535da6dffca0a08dede6ef18ced68e1cf73335bc0cfb27874620",
-    "dbt/tests/survey_routing.sql": "eb0890550573856b4b9eb8a0f8b9bc5b87a3e8537f9915b82e834531de434e73",
+    "dbt/tests/metadata_contract.sql": "bc1a3b7cab11362b0df0a860125d259016693866551e54ed609f9bd087695b6a",
+    "dbt/tests/missing_semantics.sql": "b7158773f2780f3aba4deaf8ae423d4988c0580cff2f335f3e32a0464fdb07ce",
+    "dbt/tests/survey_routing.sql": "e1afb9eec3efeb1aa6864071e48e6141b8f32298ab5a616f7cc61ec4e360f034",
     "dbt/tests/wave_coverage.sql": "ca6c336c4a4cb1f8ffbb8e27b3a86332d6c299ac52cbef71a30be9467eebfb6e",
     "dbt/tests/wave_row_counts.sql": "a4f8281a963c77e3dcc12f9af440d5a035f1ae4faa90aa17d91abc7bf98e27e9",
+    "dbt/tests/wave_weight_totals.sql": "39a2361774f9126b87f6e68f1c6a17664ca09fe947b22623f8fff8e9d0d630fd",
     "dbt/dbt_project.yml": "66f6d6bc1b00d5ccfc88c9683ad8229d7e9a0a9dc4ecdb0100f4807db8b167d2",
-    "dbt/models/marts/schema.yml": "42bd03fb3e0128ad8d5ff6c7105f74b9c3c7a1c663f52fddb09f9d156148220c",
-    "dbt/models/staging/schema.yml": "621877417eb22ed08bc1c69e4dc72a106704f1e205bd2f54dc4b16367df6153a",
+    "dbt/models/marts/schema.yml": "2b3648c3951cf61702470a289e3d0c1bc72245b2274a165d46f116301a88ac3a",
+    "dbt/models/staging/schema.yml": "d81dbb4444f25380ae59760e2dba737bbee357b2d512893dd699db577aefe043",
     "dbt/profiles.yml": "0ff57d5918ead0ed8a8c0e4b832c7f4fcd38960db0a1ad8b5cd1faa068576106",
     "dbt/seeds/schema.yml": "394466fb8a1e088586c38eda4d3661a77003db934cf88b0e888175e809079dc1",
     "dbt/seeds/codebook.csv": "b623dfbcd0448e7f3c754f863094e58ed63737853968f828888ee5577efb11f0",
@@ -40,39 +42,36 @@
   "query_hashes": {
     "dbt/analyses/01_prayer.sql": "2f0410a076fd74cc884e12a740916c32f5e8317acf13d9d73b2230294fe23024",
     "dbt/analyses/02_afterlife.sql": "a6a7c1b6405af0d8c0c86a5b238996eb6c16d49c027b1a7a4a45bf64dc30645a",
-    "dbt/analyses/03_industry.sql": "c95bb48c1f018e0965f0e3bcce744b2e52671ad7203bdeb6e54f5be552b7533d",
+    "dbt/analyses/03_industry.sql": "96e347110f16ac1b1e3be6a6f691c71ccafb0c54b567660ba3cc9bf9ad7a4caa",
     "dbt/analyses/04_tv_satisfaction.sql": "854f4946f54cfa2bf665383712ddb1df419248ee6e2fb1db6c33e3b152466118",
-    "dbt/analyses/05_ever_work.sql": "22404ee45d44871c8c7399bffd9bf5fbc7563b82dce25d168ef683f0415de7a7",
-    "dbt/analyses/06_wave_changes.sql": "e1090413fd44dd687ceff74933206104adf0700b7afe6607ca5a4c9645859beb",
-    "dbt/analyses/07_overlap.sql": "ffcbdd5e8494c6cbd93fad41b8323b41d26bed09237d00ba6904af14f0f86447",
-    "dbt/analyses/08_technology_interest.sql": "8298916ed927e6f45761407f35308766664b7ab9c22fd8deaeeac6ffd0e13231",
+    "dbt/analyses/05_ever_work.sql": "70231d25dde4e255b1263a0392754c9a82dc5d821bf2b4b668ca92c6dfce45df",
+    "dbt/analyses/06_wave_changes.sql": "a41a0c067b2ec5be1906b663376d883742bc5d618ac2795141727358b80e8409",
+    "dbt/analyses/07_overlap.sql": "43a8db13802600989cc178993a40dbd3940063854683e03ab2f70a9eb7232321",
     "dbt/analyses/09_ballot_coverage.sql": "35ac6c9bce881370e52b74b56d1b894edc0ffb8f87b77e1350eedae8215f95ef",
-    "dbt/analyses/10_prayer_afterlife.sql": "d9c69947e6d757493368c0079d18c0d255339cfb3b5de87129f6175fbddaf1df",
-    "dbt/analyses/11_media_by_age.sql": "c7efea8403af1d7d3aa680b7acd5c93890e76d3114d216b86c468b863fb0e9b5",
+    "dbt/analyses/10_weight_sensitivity.sql": "d5a914d7e39adc80aa5d6bb5ecd305f000992f804cc7b804b1101d43078b74bb",
     "dbt/analyses/12_report_summary.sql": "db63f406f416d53a20d96001f51f455a6cb8bf72174da724131daba4ebed626f",
-    "dbt/analyses/13_web_sensitivity.sql": "78397a33d1ce12268197c091df2bb7ffc7119da7c76e8ff8cedf77e143ca7d17",
-    "dbt/analyses/14_work_status_sensitivity.sql": "5f8e3a516711623ede7d5c753815c64e03cd4263ae0038bab04e4541e895198d",
-    "dbt/analyses/schema.yml": "b5e5518b984f0be0ac9584143caefd990c4f24b5faa03a3ff960d19d1288447f"
+    "dbt/analyses/14_work_status_sensitivity.sql": "20c9fac1a3928e4e3dc11b3091544edb7aed687f4f1c9b887da23f1b0e4645cf",
+    "dbt/analyses/schema.yml": "6ac6e2a758e897e2ecafdfa33d5fecb10218fae9f68db40591e9c601b407cd46"
   },
   "slowest_query": "14_work_status_sensitivity.sql",
   "changed_model": "respondents",
-  "before_ms": 128.02259999989474,
-  "after_ms": 23.189800000182004,
+  "before_ms": 104.28429999956279,
+  "after_ms": 19.431700002314756,
   "equal_result_rows": 24,
   "break_even_reads": 2,
   "materialization": {
     "stg_membership": {
-      "build_ms": 47.43210000015097,
+      "build_ms": 30.926399998861598,
       "incremental_storage_bytes": 262144,
       "rows": 10620
     },
     "answers": {
-      "build_ms": 635.5226000005132,
-      "incremental_storage_bytes": 2883584,
+      "build_ms": 513.985199999297,
+      "incremental_storage_bytes": 2621440,
       "rows": 232590
     },
     "respondents": {
-      "build_ms": 191.29130000055738,
+      "build_ms": 140.82410000264645,
       "incremental_storage_bytes": 524288,
       "rows": 7753
     }

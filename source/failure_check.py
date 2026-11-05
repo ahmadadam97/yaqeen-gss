@@ -137,6 +137,7 @@ CASES = [
     ("TV hours out of range (99)", edit(CUT_A, set_first("tvhours", "99", ballot="Ballot a")), "invalid_answers"),
     ("A wave outside the reviewed years", edit(CUT_A, set_first("year", "2022")), "invalid_answers"),
     ("Half of 2018 deleted, manifest resealed", edit(CUT_B, drop_half_of_2018), "wave_row_counts"),
+    ("One 2018 weight set to 5000", edit(CUT_B, set_first("wtssps", "5000", year=2018)), "wave_weight_totals"),
     ("POSTLIFE blank for all of 2018", edit(CUT_B, blank_postlife_2018), "wave_coverage"),
     ("PRAY column missing from cut B", edit(CUT_B, drop_pray), "wave_coverage"),
     ("EVWORK answered by a full-time worker", edit(CUT_A, set_first("evwork", "YES", wrkstat="Working full time")), "survey_routing"),

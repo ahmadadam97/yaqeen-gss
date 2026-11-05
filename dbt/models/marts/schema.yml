@@ -47,7 +47,7 @@ models:
       - {name: tvhours_value, description: "Reported television hours per day."}
       - {name: wwwhr_value, description: "Whole weekly hours on the web excluding email."}
       - {name: wwwmin_value, description: "Additional weekly web minutes."}
-      - {name: wtssps_value, description: "Person poststratification weight. The primary weight in every analysis."}
+      - {name: wtssps_value, description: "Person poststratification weight. The primary weight for Q1 to Q6."}
       - {name: wtssnrps_value, description: "Nonresponse-adjusted person weight, used as a sensitivity check."}
       - {name: wrkstat_value, description: "Original numeric labor force category."}
       - {name: pray_value, description: "Ordered frequency code. Lower means more frequent."}

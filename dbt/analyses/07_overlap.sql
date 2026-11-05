@@ -12,9 +12,9 @@ with membership as (
 
 counts as (
     select
-        count(*) filter (where in_a) as a,
-        count(*) filter (where in_b) as b,
-        count(*) filter (where in_a and in_b) as shared,
+        count(*) filter (where in_a) as cut_a_n,
+        count(*) filter (where in_b) as cut_b_n,
+        count(*) filter (where in_a and in_b) as shared_n,
         count(*) filter (where in_a or in_b) as distinct_n
     from membership
 ),
@@ -35,8 +35,8 @@ grain as (
 
 select
     *,
-    round(100.0 * shared / nullif(a, 0), 2) as pct_a,
-    round(100.0 * shared / nullif(b, 0), 2) as pct_b,
+    round(100.0 * shared_n / nullif(cut_a_n, 0), 2) as shared_of_cut_a_pct,
+    round(100.0 * shared_n / nullif(cut_b_n, 0), 2) as shared_of_cut_b_pct,
     analysis_rows - distinct_interview_keys as duplicate_analysis_rows,
     distinct_interview_keys - distinct_ids_alone as interviews_lost_using_id_alone
 from counts
